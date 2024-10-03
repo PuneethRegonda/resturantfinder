@@ -1,5 +1,5 @@
 // Function to search restaurants by query using your Spring Boot backend
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'http://localhost:5173';
 
 import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
 
@@ -41,6 +41,8 @@ export const getNearbyRestaurants = async (lat, lng) => {
     // Constructing the URL to call the backend with latitude and longitude
     const url = `${BASE_URL}/api/nearby-restaurants?location=${lat},${lng}`;
 
+    // const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=3000&type=restaurant&key=AIzaSyBySUHGKZMzennGXX03aLp3IqjZqqwgyqU`
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -64,7 +66,7 @@ export const getNearbyRestaurants = async (lat, lng) => {
 export const checkPincodeValidity = async (pincode) => {
   try {
     // Replace with your actual Google Maps API key
-    const apiKey = 'AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU';
+    const apiKey = 'AIzaSyBySUHGKZMzennGXX03aLp3IqjZqqwgyqU';
 
     // Make the API call using fetch
     const response = await fetch(
@@ -109,7 +111,7 @@ export const getRestaurantDetails = async (id) => {
 
 export const getPhotoUrl = (placeID) => {
   if (photoDetails) {
-  const apiKey = 'AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU'; 
+  const apiKey = 'AIzaSyBySUHGKZMzennGXX03aLp3IqjZqqwgyqU'; 
   const googlePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&placeid=${placID}&key=${apiKey}`;
   return googlePhotoUrl;
   }else {

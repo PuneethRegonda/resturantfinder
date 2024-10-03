@@ -33,11 +33,6 @@ public class RestaurantService {
     @Transactional
     public Restaurant addRestaurant(RestaurantRequest request) {
           // Extract the email from the token
-    String email = jwtUtil.extractUsername(authToken.substring(7)); // Assuming "Bearer " prefix
-
-    // Fetch the user by email
-    User owner = userService.findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
         // Create a new Restaurant object
         Restaurant restaurant = new Restaurant();
         restaurant.setName(request.getName());
@@ -49,7 +44,7 @@ public class RestaurantService {
         restaurant.setRating(request.getRating());
         restaurant.setUserRatingsTotal(request.getUserRatingsTotal());
         restaurant.setVicinity(request.getVicinity());
-        restaurant.setOwner(request.getOwner());
+        restaurant.setOwner(null);
         // Map details
         RestaurantDetails details = new RestaurantDetails();
         details.setDescription(request.getDescription());

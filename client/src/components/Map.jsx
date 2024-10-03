@@ -47,7 +47,7 @@ const MapContainer = ({ places, userLocation }) => {
       }}
       className="map-container"
     >
-      <LoadScript googleMapsApiKey="AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU" libraries={libraries}>
+      <LoadScript googleMapsApiKey="AIzaSyBySUHGKZMzennGXX03aLp3IqjZqqwgyqU" libraries={libraries}>
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={userLocation}
@@ -79,7 +79,7 @@ const MapContainer = ({ places, userLocation }) => {
                 <img
                   src={
                     selectedPlace.photos && selectedPlace.photos.length > 0
-                      ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&photoreference=${selectedPlace.photos[0].photo_reference}&key=AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU`
+                      ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&photoreference=${selectedPlace.photos[0].photo_reference}&key=AIzaSyBySUHGKZMzennGXX03aLp3IqjZqqwgyqU`
                       : 'https://via.placeholder.com/100'
                   }
                   alt={selectedPlace.name}

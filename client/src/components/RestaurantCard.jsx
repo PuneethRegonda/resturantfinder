@@ -5,14 +5,24 @@ import { Link } from 'react-router-dom';
 const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked }) => {
   const [photoUrls, setPhotoUrls] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Current image index
+  const [imageList, setImageList] = useState([]); // Images from images.json
+  useEffect(() => {
+    // Fetch the images.json file
+    fetch('../../images.json') // Update the path based on your file location
+      .then((response) => response.json())
+      .then((data) => {
+        setImageList(data.images.map((img) => img.image_url));
+      })
+      .catch((err) => console.error('Error fetching images.json:', err));
+  }, []);
 
   useEffect(() => {
-    if (restaurant.id) {
-      getPlacePhotos(restaurant.id, 200)
-        .then((urls) => setPhotoUrls(urls))
-        .catch(() => setPhotoUrls(['https://via.placeholder.com/400']));
+    if (restaurant.id && imageList.length > 0) {
+      // Assign an image to the restaurant based on its index (or other logic)
+      const imgIndex = restaurant.id % imageList.length; // Example: Modulo to cycle through images
+      restaurant.img = imageList[imgIndex];
     }
-  }, [restaurant.id]);
+  }, [restaurant, imageList]);
 
   // Handle showing the next image
   const handleNextImage = () => {
@@ -53,18 +63,15 @@ const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked 
           marginRight: 2,
         }}
       >
-        {/* Image */}
-        {photoUrls.length > 0 && (
           <img
-            src={photoUrls[currentImageIndex]}
-            alt={`Restaurant ${currentImageIndex + 1}`}
+            src={restaurant.img}
+            alt={restaurant.name}
             style={{
-              width: '100%',
-              height: '100%',
+              width: '200px',
+              height: '200px',
               objectFit: 'cover',
             }}
           />
-        )}
 
         {/* Previous and Next Buttons */}
         <Button

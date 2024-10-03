@@ -1,23 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import AppHeader from '../../components/Header';
 import Footer from '../../components/Footer';
 import PaginatedList from '../../components/PaginatedList';
 import RestaurantCard from '../../components/RestaurantCard';
 import InvalidSearch from '../../components/InvalidSearch';
-import { searchRestaurants } from '../../services/restaurantService';
+import { getNearbyRestaurants, searchRestaurants } from '../../services/restaurantService';
+import MapContainer from '../../components/Map';
 
 const Home = () => {
+  const [places, setPlaces] = useState([]);
   const [isSearchValid, setIsSearchValid] = useState(true);
   const [searchPayload, setSearchPayload] = useState({}); // Store search filters
-
+  const [userLocation, setUserLocation] = useState({ lat: 0, lng: 0 });
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(location);
+          getNearbyRestaurants(location.lat, location.lng);
+        },
+        (error) => {
+          console.error('Error getting user location', error);
+          if (error.code === 1) {
+            // User denied Geolocation
+            setUserLocation({ lat: 37.7749, lng: -122.4194 }); // Default to San Francisco
+            // Optionally inform the user
+            alert(
+              'Location access denied. Showing results for the default location (San Francisco). You can also search by ZIP code.'
+            );
+            fetchNearbyRestaurants(37.7749, -122.4194);
+          }
+        }
+      );
+    } else {
+      console.error('Geolocation not supported');
+    }
+  }, []);
   // Handle search from the header
-  const handleSearch = (triggeredBy, payload, isValid) => {
+  const handleSearch = (triggeredBy,query, isValid) => {
     setIsSearchValid(isValid); // Update search validity state
     if (isValid) {
-      setSearchPayload(payload); // Update search filters
-    }
+      setSearchPayload(payload); 
   };
+}
 
   // Fetch data for the paginated list
   const fetchRestaurants = async (page, pageSize) => {
@@ -28,6 +58,7 @@ const Home = () => {
         data: response.data.content, // List of restaurants
         totalPages: response.data.totalPages, // Total pages from API
       };
+      api/google-search-restaurants
     } catch (error) {
       console.error('Error fetching restaurants:', error);
       throw error;
@@ -78,9 +109,7 @@ const Home = () => {
             borderRadius: '8px',
           }}
         >
-          <Typography variant="h6" sx={{ padding: 2, color: '#757575' }}>
-            Map Placeholder
-          </Typography>
+          <MapContainer places={places} userLocation={userLocation} />
         </Box>
       </Box>
 
