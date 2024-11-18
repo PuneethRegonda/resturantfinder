@@ -1,0 +1,73 @@
+[ 
+    {
+        "name": "District - San Jose",
+        "link": "https://example.com/restaurant-link",
+        "rating": 4.4,
+        "reviews": 526,
+        "tags": ["Tapas/Small Plates", "Wine Bars", "Whiskey Bars"],
+        "address": "Downtown San Jose",
+        "description": "Came here on a Saturday as soon as they opened...",
+        "photos": [
+          { "photo_reference": "some_photo_reference" }
+        ],
+        "websiteLink": "https://example.com",
+        "delivery": true,
+        "takeout": true
+      },    
+{
+    "business_status" : "OPERATIONAL",
+    "geometry" : 
+    {
+       "location" : 
+       {
+          "lat" : 37.3328862,
+          "lng" : -121.8893084
+       },
+       "viewport" : 
+       {
+          "northeast" : 
+          {
+             "lat" : 37.3343672802915,
+             "lng" : -121.8876644197085
+          },
+          "southwest" : 
+          {
+             "lat" : 37.33166931970851,
+             "lng" : -121.8903623802915
+          }
+       }
+    },
+    "name" : "Fairmont San Jose",
+    "photos" : 
+    [
+       {
+          "height" : 3596,
+          "html_attributions" : 
+          [
+             "\u003ca href=\"https://maps.google.com/maps/contrib/116319303957678878480\"\u003eFairmont San Jose\u003c/a\u003e"
+          ],
+          "photo_reference" : "AdDdOWo1gv8YQnOmp1Y9iO7MczjGvfOsSBt8gL2wRKh5bAOknVflFq8Co_7ETe8euK8GeOo-A0BRTM6wuJ7ikvwLWTgvOB88zAXvUj6FzZ5MidhGjSO9BJHWYhkmzQMT6Oi0JEkU6F-aJ1JakMJDi-d4wveEVmw560x4OkwU8_fuxemxBj5b",
+          "width" : 5868
+       }
+    ],
+    "place_id" : "ChIJJxVjI7vMj4ARPYYHcC-20vo",
+    "plus_code" : 
+    {
+       "compound_code" : "84M6+57 San Jose, CA, USA",
+       "global_code" : "849W84M6+57"
+    },
+    "price_level" : 4,
+    "rating" : 4.4,
+    "reference" : "ChIJJxVjI7vMj4ARPYYHcC-20vo",
+    "scope" : "GOOGLE",
+    "types" : 
+    [
+       "lodging",
+       "restaurant",
+       "food",
+       "point_of_interest",
+       "establishment"
+    ],
+    "user_ratings_total" : 4636,
+    "vicinity" : "170 South Market Street, San Jose"
+ }]
