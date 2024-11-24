@@ -1,86 +1,192 @@
 import React, { useEffect, useState } from 'react';
-import { getPhotoUrl } from '../services/restaurantService'; // This function will generate the full photo URL based on the reference
-import { Card, CardContent, CardActions, Button, Typography, Rating, Box, Chip, Grid2 } from '@mui/material';
-import { Link } from 'react-router-dom'; 
+import { getPlacePhotos } from '../services/restaurantService';
+import { Card, Box, Typography, Chip, Button, Rating } from '@mui/material';
+import { Link } from 'react-router-dom';
 const RestaurantCard = ({ restaurant }) => {
-  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoUrls, setPhotoUrls] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Current image index
 
   useEffect(() => {
-    // Construct the photo URL using the photoReference from the restaurant data
-    if (restaurant.photos && restaurant.photos.length > 0) {
-      const photoReference = restaurant.photos[0].photo_reference;
-      const url = getPhotoUrl(photoReference);
-      setPhotoUrl(url);
-    } else {
-      setPhotoUrl('https://via.placeholder.com/400'); // Set placeholder if no photo is available
+    if (restaurant.place_id) {
+      getPlacePhotos(restaurant.place_id, 200)
+        .then((urls) => setPhotoUrls(urls))
+        .catch(() => setPhotoUrls(['https://via.placeholder.com/400']));
     }
-  }, [restaurant.photos]);
+  }, [restaurant.place_id]);
+
+  // Handle showing the next image
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % photoUrls.length);
+  };
+
+  // Handle showing the previous image
+  const handlePreviousImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? photoUrls.length - 1 : prevIndex - 1
+    );
+  };
 
   return (
-    <Card variant="outlined" sx={{ marginBottom: 2, borderRadius: 2, padding: 2 }}>
-      <CardContent sx={{ paddingBottom: '8px !important' }}>
-        <Grid2 container spacing={2}>
-          {/* Image Section */}
-          <Grid2 item xs={12} sm={4}>
-            <img
-              src={photoUrl}
-              alt={restaurant.name}
-              width="100%"
-              height="auto"
-              style={{ borderRadius: 8 }}
-            />
-          </Grid2>
-
-          {/* Restaurant Details Section */}
-          <Grid2 item xs={12} sm={8}>
-            {/* Restaurant Name and Rating */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', marginBottom: 1 }}>
-            <Typography
-              variant="h6"
-              component={Link}  
-              to={`/restaurant/${restaurant.name.replace(/\s+/g, '-')}`} 
-              target='_blank_'
-              sx={{ textDecoration: 'none', color: 'inherit' }}  
-            >
-              {restaurant.name}
-            </Typography>
-
-              <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 0.5 }}>
-                <Rating name="read-only" value={restaurant.rating} readOnly precision={0.1} size="small" />
-                <Typography variant="body2" component="span" sx={{ marginLeft: 1, fontSize: '0.875rem', color: '#555' }}>
-                  {restaurant.rating} ({restaurant.user_ratings_total} reviews)
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Tags (Types) */}
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, marginBottom: 1 }}>
-              {restaurant.types && restaurant.types.slice(0, 3).map((type, index) => (
-                <Chip key={index} label={type} variant="outlined" size="small" />
-              ))}
-            </Box>
-
-            {/* Address */}
-            <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
-              {restaurant.vicinity}
-            </Typography>
-
-            {/* Description or Additional Info */}
-            <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1, fontStyle: 'italic', fontSize: '0.875rem' }}>
-              {/* Add a description if available, otherwise add any placeholder text */}
-              {restaurant.description ? restaurant.description : "Great place to enjoy delicious food and cozy atmosphere."}
-            </Typography>
-          </Grid2>
-        </Grid2>
-      </CardContent>
-      <CardActions sx={{ justifyContent: 'space-between', paddingTop: 0 }}>
-        {/* Additional action button like 'Start Order' */}
-        {restaurant.delivery && (
-          <Button size="small" variant="contained" color="primary">
-            Start Order
-          </Button>
+    <Card
+      sx={{
+        display: 'flex',
+        padding: 2,
+        borderRadius: '8px',
+        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
+        marginBottom: 2,
+      }}
+    >
+      {/* Image Section */}
+      <Box
+        sx={{
+          position: 'relative',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          flexShrink: 0,
+          marginRight: 2,
+        }}
+      >
+        {/* Image */}
+        {photoUrls.length > 0 && (
+          <img
+            src={photoUrls[currentImageIndex]}
+            alt={`Restaurant ${currentImageIndex + 1}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
         )}
-      </CardActions>
+
+        {/* Previous and Next Buttons */}
+        <Button
+  onClick={handlePreviousImage}
+  disabled={currentImageIndex === 0} // Disable button if at the first image
+  size="small"
+  sx={{
+    position: 'absolute',
+    top: '50%',
+    left: '10px',
+    transform: 'translateY(-50%)',
+    backgroundColor: currentImageIndex === 0 ? '#f0f0f0' : 'white',
+    color: currentImageIndex === 0 ? '#d0d0d0' : 'black',
+    borderRadius: '50%',
+    minWidth: '32px', // Oval width
+    minHeight: '32px', // Oval height
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: currentImageIndex === 0 ? 'none' : '0 2px 4px rgba(0,0,0,0.2)',
+    zIndex: 2,
+    border: '1px solid #dcdcdc',
+    '&:hover': {
+      backgroundColor: currentImageIndex === 0 ? '#f0f0f0' : '#f7f7f7',
+    },
+  }}
+>
+  &lt;
+</Button>
+
+<Button
+  onClick={handleNextImage}
+  disabled={currentImageIndex === photoUrls.length - 1} // Disable button if at the last image
+  size="small"
+  sx={{
+    position: 'absolute',
+    top: '50%',
+    right: '10px',
+    transform: 'translateY(-50%)',
+    backgroundColor: currentImageIndex === photoUrls.length - 1 ? '#f0f0f0' : 'white',
+    color: currentImageIndex === photoUrls.length - 1 ? '#d0d0d0' : 'black',
+    borderRadius: '50%',
+    minWidth: '32px', // Oval width
+    minHeight: '32px', // Oval height
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: currentImageIndex === photoUrls.length - 1 ? 'none' : '0 2px 4px rgba(0,0,0,0.2)',
+    zIndex: 2,
+    border: '1px solid #dcdcdc',
+    '&:hover': {
+      backgroundColor: currentImageIndex === photoUrls.length - 1 ? '#f0f0f0' : '#f7f7f7',
+    },
+  }}
+>
+  &gt;
+</Button>
+      </Box>
+
+      {/* Content Section */}
+      <Box sx={{ flex: 1 }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 1 }}
+         component={Link}
+         to={`/restaurant/${restaurant.name.replace(/\s+/g, '-')}`}
+         target="_blank"
+        >
+          {restaurant.name}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
+          <Rating
+            name="read-only"
+            value={restaurant.rating}
+            readOnly
+            size="small"
+          />
+          <Typography
+            variant="body2"
+            sx={{ marginLeft: 1, color: '#757575', fontSize: '0.875rem' }}
+          >
+            {restaurant.rating} ({restaurant.user_ratings_total} reviews)
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, marginBottom: 1 }}>
+          {restaurant.types &&
+            restaurant.types.slice(0, 2).map((type, index) => (
+              <Chip
+                key={index}
+                label={type}
+                variant="outlined"
+                size="small"
+                sx={{ fontSize: '0.75rem', color: '#757575' }}
+              />
+            ))}
+          <Chip label="$$" variant="outlined" size="small" sx={{ fontSize: '0.75rem', color: '#757575' }} />
+        </Box>
+
+        <Typography
+          variant="body2"
+          sx={{ color: 'green', fontWeight: 'bold', marginBottom: 1 }}
+        >
+          Opens in 33 min
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: '#757575',
+            fontSize: '0.875rem',
+            marginBottom: 1,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          “Pick up your favorite holiday menu item or try something new. Order
+          on the Starbucks® app & pick up today.”
+        </Typography>
+
+        <Button
+          variant="outlined"
+          sx={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            borderRadius: '8px',
+          }}
+        >
+          Get Directions
+        </Button>
+      </Box>
     </Card>
   );
 };

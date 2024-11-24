@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Box, Typography, Button, Grid2, Card, CardMedia, CardContent, Dialog, DialogContent } from '@mui/material';
 import Rating from '@mui/material/Rating';
 import { useParams } from 'react-router-dom';
-import { getRestaurantDetails, getPhotoUrl } from '../services/restaurantService';
-import WriteReviewForm from '../components/WriteReview';
+import { getRestaurantDetails, getPhotoUrl } from '../../services/restaurantService';
+import WriteReviewForm from '../../components/WriteReview';
 
 const RestaurantPage = () => {
   const { name } = useParams();

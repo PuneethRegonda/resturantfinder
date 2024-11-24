@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import RestaurantCard from '../components/RestaurantCard';
-import MapContainer from '../components/Map';
+import RestaurantCard from '../../components/RestaurantCard';
+import MapContainer from '../../components/Map';
 import { Box, Typography } from '@mui/material';
-import { getNearbyRestaurants, searchRestaurants } from '../services/restaurantService';
-import AppHeader from '../components/Header';
-import Footer from '../components/Footer';
-import InvalidSearch from '../components/InvalidSearch';
+import { getNearbyRestaurants, searchRestaurants } from '../../services/restaurantService';
+import AppHeader from '../../components/Header';
+import Footer from '../../components/Footer';
+import InvalidSearch from '../../components/InvalidSearch';
 const Home = () => {
   const [places, setPlaces] = useState([]);
   const [userLocation, setUserLocation] = useState({ lat: 0, lng: 0 });
@@ -53,7 +53,7 @@ const Home = () => {
   return (
     <>
       {/* Header Component */}
-      <AppHeader onSearch={handleSearch} />
+      <AppHeader onSearch={handleSearch} sx={{padding:'0px'}}/>
       {/* Main Content */}
       <Box
         sx={{
@@ -68,7 +68,7 @@ const Home = () => {
           {isSearchValid ? (
             <>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold',padding:'13px' }}>
                   Restaurants in the current map area
                 </Typography>
               </Box>

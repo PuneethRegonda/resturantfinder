@@ -1,4 +1,6 @@
 // Function to search restaurants by query using your Spring Boot backend
+const BASE_URL = 'http://localhost:5000';
+
 export const searchRestaurants = async (query, lat, lng) => {
   try {
     // Destructure filters
@@ -12,7 +14,7 @@ export const searchRestaurants = async (query, lat, lng) => {
     // if (priceLevel) queryParams.append('priceLevel', priceLevel);
     // if (minRating) queryParams.append('minRating', minRating);
 
-    const response = await fetch(`http://localhost:5000/api/search-restaurants?${queryParams.toString()}`, {
+    const response = await fetch(`${BASE_URL}/api/search-restaurants?${queryParams.toString()}`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -31,11 +33,6 @@ export const searchRestaurants = async (query, lat, lng) => {
   }
 };
 
-
-
-
-// src/services/restaurantService.js
-
 // Function to get nearby restaurants using the Spring Boot backend
 export const getNearbyRestaurants = async (lat, lng) => {
   if (!lat || !lng) {
@@ -45,7 +42,7 @@ export const getNearbyRestaurants = async (lat, lng) => {
 
   try {
     // Constructing the URL to call the backend with latitude and longitude
-    const url = `http://localhost:5000/api/nearby-restaurants?location=${lat},${lng}`;
+    const url = `${BASE_URL}/api/nearby-restaurants?location=${lat},${lng}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -95,7 +92,7 @@ export const checkPincodeValidity = async (pincode) => {
 
 export const getRestaurantDetails = async (name) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/get-restaurant-details?name=${encodeURIComponent(name)}`);
+    const response = await fetch(`${BASE_URL}/api/get-restaurant-details?name=${encodeURIComponent(name)}`);
     if (response.ok) {
       const data = await response.json();
       if (data.results && data.results.length > 0) {
@@ -112,14 +109,28 @@ export const getRestaurantDetails = async (name) => {
     throw error;
   }
 };
-export const getPhotoUrl = (photoReference) => {
-  if (!photoReference) {
-    console.error('No photo reference provided');
-    return 'https://via.placeholder.com/400'; // Placeholder if no photo reference is provided
-  }
 
-  const apiKey = 'AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU'; // Replace with your actual API key
-  const googlePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&photoreference=${photoReference}&key=${apiKey}`;
-
+export const getPhotoUrl = (placeID) => {
+  if (photoDetails) {
+  const apiKey = 'AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU'; 
+  const googlePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&placeid=${placID}&key=${apiKey}`;
   return googlePhotoUrl;
+  }else {
+    return 'https://via.placeholder.com/400'; 
+  }
 };
+
+export const getPlacePhotos = async (placeId, maxwidth = 200) => {
+  try {
+    const response = await fetch(`${BASE_URL}/place/photos?placeId=${encodeURIComponent(placeId)}&maxwidth=${maxwidth}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch photos: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json(); 
+    return data; 
+  } catch (error) {
+    console.error('Error fetching photos:', error.message);
+    throw error;
+  }
+};
+
