@@ -1,5 +1,8 @@
+#BackendBuild
+./Backend_old/target/
 # Dependencies
 ./client/node_modules
+./client/node_modules_old
 /.pnp
 .pnp.js
 
