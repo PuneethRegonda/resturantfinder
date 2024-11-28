@@ -87,6 +87,18 @@
 		</dependency>
 
 
+		<!-- AWS SDK for S3 -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.20.91</version> <!-- Ensure compatibility with Java 21 -->
+		</dependency>
+
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>auth</artifactId>
+			<version>2.20.91</version> <!-- For handling credentials -->
+		</dependency>
 
 
 	</dependencies>
