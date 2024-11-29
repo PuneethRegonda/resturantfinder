@@ -1,6 +1,8 @@
 package com.opensource.resturantfinder.security;
 
+import com.opensource.resturantfinder.exception.JwtTokenExpiredException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -9,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,7 +58,7 @@ public class JwtUtil {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    public String extractUsername(String token) {
+    public String extractUsername(String token) throws JwtTokenExpiredException , JwtException {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -77,7 +78,11 @@ public class JwtUtil {
                 .getBody();
     }
 
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    public Boolean isTokenExpired(String token) {
+        try{
+            return extractExpiration(token).before(new Date());
+        }catch (Exception e){
+            return true;
+        }
     }
 }
