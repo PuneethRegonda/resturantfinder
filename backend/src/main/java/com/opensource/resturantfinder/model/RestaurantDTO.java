@@ -1,55 +1,23 @@
-package com.opensource.resturantfinder.entity;
+package com.opensource.resturantfinder.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.opensource.resturantfinder.converter.PriceRangeConverter;
-import com.opensource.resturantfinder.model.PriceRange;
-import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-@Entity
-@Table(name = "restaurants")
-public class Restaurant {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class RestaurantDTO {
     private Long id;
-
-    @Column(nullable = false)
     private String name;
-
     private String businessStatus;
     private Double latitude;
     private Double longitude;
     private String iconUrl;
-
-    @Convert(converter = PriceRangeConverter.class)
-    @Column(name = "price_level")
     private PriceRange priceLevel;
-
-
     private Double rating;
     private Integer userRatingsTotal;
     private String vicinity;
+    private RestaurantDetailsDTO details;
+    private List<OperatingHoursDTO> operatingHours;
+    private List<CategoryDTO> categories;
 
-    @OneToOne(mappedBy = "restaurant", cascade = CascadeType.ALL)
-    private RestaurantDetails details;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "restaurant")
-    private List<OperatingHours> operatingHours = new ArrayList<>();
-
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "restaurant_categories",
-            joinColumns = @JoinColumn(name = "restaurant_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    @JsonManagedReference // Forward serialization for categories
-    private Set<Category> categories = new HashSet<>();
-
-    // Getters and Setters
+    // Getters and setters
 
     public Long getId() {
         return id;
@@ -131,27 +99,27 @@ public class Restaurant {
         this.vicinity = vicinity;
     }
 
-    public RestaurantDetails getDetails() {
+    public RestaurantDetailsDTO getDetails() {
         return details;
     }
 
-    public void setDetails(RestaurantDetails details) {
+    public void setDetails(RestaurantDetailsDTO details) {
         this.details = details;
     }
 
-    public List<OperatingHours> getOperatingHours() {
+    public List<OperatingHoursDTO> getOperatingHours() {
         return operatingHours;
     }
 
-    public void setOperatingHours(List<OperatingHours> operatingHours) {
+    public void setOperatingHours(List<OperatingHoursDTO> operatingHours) {
         this.operatingHours = operatingHours;
     }
 
-    public Set<Category> getCategories() {
+    public List<CategoryDTO> getCategories() {
         return categories;
     }
 
-    public void setCategories(Set<Category> categories) {
+    public void setCategories(List<CategoryDTO> categories) {
         this.categories = categories;
     }
 }

@@ -5,6 +5,7 @@ import com.opensource.resturantfinder.entity.OperatingHours;
 import com.opensource.resturantfinder.entity.Restaurant;
 import com.opensource.resturantfinder.entity.RestaurantDetails;
 import com.opensource.resturantfinder.model.OperatingHoursRequest;
+import com.opensource.resturantfinder.model.PriceRange;
 import com.opensource.resturantfinder.model.RestaurantRequest;
 import com.opensource.resturantfinder.repository.CategoryRepository;
 import com.opensource.resturantfinder.repository.RestaurantRepository;
@@ -32,7 +33,7 @@ public class RestaurantService {
         restaurant.setLatitude(request.getLatitude());
         restaurant.setLongitude(request.getLongitude());
         restaurant.setIconUrl(request.getIconUrl());
-        restaurant.setPriceLevel(request.getPriceLevel());
+        restaurant.setPriceLevel(PriceRange.fromValue(request.getPriceLevel()));
         restaurant.setRating(request.getRating());
         restaurant.setUserRatingsTotal(request.getUserRatingsTotal());
         restaurant.setVicinity(request.getVicinity());
