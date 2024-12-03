@@ -154,4 +154,23 @@ public class Restaurant {
     public void setCategories(Set<Category> categories) {
         this.categories = categories;
     }
+
+    @Override
+    public String toString() {
+        return "Restaurant{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", businessStatus='" + businessStatus + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", iconUrl='" + iconUrl + '\'' +
+                ", priceLevel=" + priceLevel +
+                ", rating=" + rating +
+                ", userRatingsTotal=" + userRatingsTotal +
+                ", vicinity='" + vicinity + '\'' +
+                ", details=" + details +
+                ", operatingHours=" + operatingHours +
+                ", categories=" + categories +
+                '}';
+    }
 }

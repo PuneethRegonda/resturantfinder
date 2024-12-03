@@ -1,12 +1,18 @@
 package com.opensource.resturantfinder.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalTime;
 
 public class OperatingHoursDTO {
     private Long id;
     private Integer dayOfWeek;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime openTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime closeTime;
+
 
     // Getters and setters
 
@@ -40,5 +46,15 @@ public class OperatingHoursDTO {
 
     public void setCloseTime(LocalTime closeTime) {
         this.closeTime = closeTime;
+    }
+
+    @Override
+    public String toString() {
+        return "OperatingHoursDTO{" +
+                "id=" + id +
+                ", dayOfWeek=" + dayOfWeek +
+                ", openTime=" + openTime +
+                ", closeTime=" + closeTime +
+                '}';
     }
 }
