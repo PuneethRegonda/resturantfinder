@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.opensource.resturantfinder.converter.PriceRangeConverter;
 import com.opensource.resturantfinder.model.PriceRange;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,10 +28,22 @@ public class Restaurant {
     private Double longitude;
     private String iconUrl;
 
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+
     @Convert(converter = PriceRangeConverter.class)
     @Column(name = "price_level")
     private PriceRange priceLevel;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     private Double rating;
     private Integer userRatingsTotal;
@@ -46,10 +61,8 @@ public class Restaurant {
             joinColumns = @JoinColumn(name = "restaurant_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    @JsonManagedReference // Forward serialization for categories
+    @JsonManagedReference
     private Set<Category> categories = new HashSet<>();
-
-    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -155,6 +168,30 @@ public class Restaurant {
         this.categories = categories;
     }
 
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     @Override
     public String toString() {
         return "Restaurant{" +
@@ -164,7 +201,10 @@ public class Restaurant {
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", iconUrl='" + iconUrl + '\'' +
+                ", owner=" + owner +
                 ", priceLevel=" + priceLevel +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
                 ", rating=" + rating +
                 ", userRatingsTotal=" + userRatingsTotal +
                 ", vicinity='" + vicinity + '\'' +

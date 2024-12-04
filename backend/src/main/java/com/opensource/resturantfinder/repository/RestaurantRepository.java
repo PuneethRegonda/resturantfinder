@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,6 +18,12 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, J
             "LEFT JOIN FETCH r.categories " +
             "WHERE r.id = :restaurantId")
     Optional<Restaurant> findWithDetailsById(@Param("restaurantId") Long restaurantId);
+
+    @Query("SELECT r FROM Restaurant r WHERE r.id = :restaurantId AND r.owner.email = :ownerEmail")
+    Optional<Restaurant> findByIdAndOwnerEmail(@Param("restaurantId") Long restaurantId, @Param("ownerEmail") String ownerEmail);
+
+    @Query("SELECT r FROM Restaurant r WHERE r.owner.email = :emailId")
+    List<Restaurant> findByEmailId(@Param("emailId") String emailId);
 
 }
 
