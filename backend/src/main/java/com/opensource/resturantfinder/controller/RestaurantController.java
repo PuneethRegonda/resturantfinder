@@ -2,6 +2,7 @@ package com.opensource.resturantfinder.controller;
 
 import com.opensource.resturantfinder.common.ApiResponse;
 import com.opensource.resturantfinder.entity.Restaurant;
+import com.opensource.resturantfinder.model.RestaurantDetailsResponse;
 import com.opensource.resturantfinder.model.RestaurantRequest;
 import com.opensource.resturantfinder.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,4 +35,16 @@ public class RestaurantController {
         Restaurant savedRestaurant = restaurantService.addRestaurant(restaurantRequest);
         return ResponseEntity.ok(ApiResponse.success(savedRestaurant, requestId));
     }
+
+
+    @GetMapping("/{restaurantId}")
+    @Operation(summary = "Get Restaurant Details", description = "Fetch details and reviews for a restaurant")
+    public ResponseEntity<ApiResponse<RestaurantDetailsResponse>> getRestaurantDetails(
+            @PathVariable Long restaurantId,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "recent") String sortBy,
+            @RequestHeader("X-Request-ID") String requestId) {
+        RestaurantDetailsResponse response = restaurantService.getRestaurantDetails(restaurantId, sortBy);
+        return ResponseEntity.ok(ApiResponse.success(response, requestId));
+    }
+
 }

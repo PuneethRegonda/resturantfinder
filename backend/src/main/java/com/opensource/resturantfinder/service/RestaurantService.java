@@ -1,21 +1,26 @@
 package com.opensource.resturantfinder.service;
 
-import com.opensource.resturantfinder.entity.Category;
-import com.opensource.resturantfinder.entity.OperatingHours;
-import com.opensource.resturantfinder.entity.Restaurant;
-import com.opensource.resturantfinder.entity.RestaurantDetails;
-import com.opensource.resturantfinder.model.OperatingHoursRequest;
-import com.opensource.resturantfinder.model.PriceRange;
-import com.opensource.resturantfinder.model.RestaurantRequest;
+import com.opensource.resturantfinder.entity.*;
+import com.opensource.resturantfinder.exception.ResourceNotFoundException;
+import com.opensource.resturantfinder.model.*;
+import com.opensource.resturantfinder.model.ReviewResponse;
+
 import com.opensource.resturantfinder.repository.CategoryRepository;
 import com.opensource.resturantfinder.repository.RestaurantRepository;
+import com.opensource.resturantfinder.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Transactional
 public class RestaurantService {
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
@@ -64,4 +69,46 @@ public class RestaurantService {
         details.setRestaurant(restaurant);
         return restaurantRepository.save(restaurant);
     }
-}
+
+    public RestaurantDetailsResponse getRestaurantDetails(Long restaurantId, String sortBy) {
+        // Fetch restaurant details
+        Restaurant restaurant = restaurantRepository.findWithDetailsById(restaurantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+
+        // Fetch reviews based on sort order
+        List<Review> reviews;
+        switch (sortBy.toLowerCase()) {
+            case "highest":
+                reviews = reviewRepository.findByRestaurantIdOrderByRatingDesc(restaurantId);
+                break;
+            case "lowest":
+                reviews = reviewRepository.findByRestaurantIdOrderByRatingAsc(restaurantId);
+                break;
+            default:
+                reviews = reviewRepository.findByRestaurantIdOrderByCreatedAtDesc(restaurantId);
+        }
+
+        // Aggregate data
+        Double averageRating = reviewRepository.findAverageRatingByRestaurantId(restaurantId);
+        Long totalReviews = reviewRepository.findReviewCountByRestaurantId(restaurantId);
+
+        // Build response
+        return new RestaurantDetailsResponse(
+                restaurant.getName(),
+                restaurant.getBusinessStatus(),
+                restaurant.getLatitude(),
+                restaurant.getLongitude(),
+                restaurant.getIconUrl(),
+                restaurant.getPriceLevel(),
+                restaurant.getRating(),
+                restaurant.getUserRatingsTotal(),
+                restaurant.getVicinity(),
+                restaurant.getDetails(),
+                restaurant.getOperatingHours(),
+                restaurant.getCategories(),
+                reviews.stream().map(ReviewResponse::new).collect(Collectors.toList()),
+                averageRating,
+                totalReviews
+        );
+    }
+    }
