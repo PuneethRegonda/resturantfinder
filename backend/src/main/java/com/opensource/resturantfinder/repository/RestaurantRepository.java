@@ -1,6 +1,8 @@
 package com.opensource.resturantfinder.repository;
 
 import com.opensource.resturantfinder.entity.Restaurant;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +26,12 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, J
 
     @Query("SELECT r FROM Restaurant r WHERE r.owner.email = :emailId")
     List<Restaurant> findByEmailId(@Param("emailId") String emailId);
+
+
+    @Query("SELECT r FROM Restaurant r WHERE (r.name, r.vicinity) IN (" +
+            "SELECT r1.name, r1.vicinity FROM Restaurant r1 GROUP BY r1.name, r1.vicinity HAVING COUNT(r1.id) > 1)")
+    Page<Restaurant> findDuplicateRestaurants(Pageable pageable);
+
 
 }
 
