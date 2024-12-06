@@ -2,6 +2,7 @@ package com.opensource.resturantfinder.config.exception;
 
 import com.opensource.resturantfinder.common.ApiResponse;
 import com.opensource.resturantfinder.common.ErrorDetails;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,6 +17,24 @@ import java.util.Collections;
 
 @ControllerAdvice
 public class AuthenticationExceptionHandler {
+
+    // Handle DataIntegrityViolationException (e.g., duplicate keys)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
+        String requestId = request.getHeader("X-Request-ID");
+
+        // Extract meaningful details from the exception
+        String detailedMessage = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                "DUPLICATE_ENTRY",
+                "User already exists in our records",
+                Collections.singletonList(detailedMessage)
+        );
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(errorDetails, requestId));
+    }
 
     // Handle Bad Credentials (wrong email or password)
     @ExceptionHandler(BadCredentialsException.class)
@@ -59,7 +78,6 @@ public class AuthenticationExceptionHandler {
                 .body(ApiResponse.error(errorDetails, requestId));
     }
 
-    // Existing Handlers
     @ExceptionHandler(HttpClientErrorException.BadRequest.class)
     public ResponseEntity<ApiResponse<Void>> handleBadRequestException(HttpClientErrorException.BadRequest ex, WebRequest request) {
         String requestId = request.getHeader("X-Request-ID");

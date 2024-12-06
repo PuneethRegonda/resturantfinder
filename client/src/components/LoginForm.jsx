@@ -4,31 +4,48 @@ import GoogleIcon from '@mui/icons-material/Google';
 import API_ENDPOINTS from '../apiConfig'; // Import the centralized API URLs
 import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
 
-const LoginForm = ({ onClose }) => {
+const LoginForm = ({ onClose, onLoginSuccess }) => { // Added onLoginSuccess prop
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
     try {
-      const response = await fetchWithRequestId('/api/auth/login', {
+      const response = await fetchWithRequestId(API_ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
+        throw new Error(errorData?.error?.message || 'Login failed');
       }
 
       const data = await response.json();
-      console.log('Login successful:', data);
+      if (data.status === 'success' && data.data.token) {
+        const token = data.data.token;
+
+        // Save the token to localStorage
+        localStorage.setItem('authToken', token);
+
+        // Notify parent about login success
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
+
+        // Close the login form
+        if (onClose) {
+          onClose();
+        }
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (err) {
       setError(err.message);
       console.error('Login error:', err);
     }
   };
-  
 
   return (
     <Box sx={{ padding: 4, maxWidth: 400, margin: '0 auto', textAlign: 'center' }}>
@@ -55,13 +72,13 @@ const LoginForm = ({ onClose }) => {
         sx={{
           marginBottom: 2,
           padding: '8px',
-          borderColor: '#dcdcdc', // Light gray border color to match
-          borderRadius: '50px', // Rounded corners to match the screenshots
-          color: '#000', // Text color similar to Google button
+          borderColor: '#dcdcdc',
+          borderRadius: '50px',
+          color: '#000',
           textTransform: 'none',
-          fontSize: '16px', // Slightly larger font
+          fontSize: '16px',
           ':hover': {
-            backgroundColor: '#f7f7f7', // Hover effect similar to the screenshot
+            backgroundColor: '#f7f7f7',
             borderColor: '#dcdcdc',
           },
         }}
@@ -100,10 +117,8 @@ const LoginForm = ({ onClose }) => {
         fullWidth
         onClick={handleLogin}
         sx={{
-          backgroundColor: '#d32323', // Set button color to red
-          '&:hover': {
-            backgroundColor: '#b71c1c', // Darker red on hover
-          },
+          backgroundColor: '#d32323',
+          '&:hover': { backgroundColor: '#b71c1c' },
           marginBottom: 2,
         }}
       >
