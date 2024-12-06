@@ -1,34 +1,34 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, TextField, Divider, Alert } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
+import API_ENDPOINTS from '../apiConfig'; // Import the centralized API URLs
+import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
 
 const LoginForm = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  // Handle login logic with validation
-  const handleLogin = () => {
-    // Validate Email
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
+  const handleLogin = async () => {
+    try {
+      const response = await fetchWithRequestId('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Validate Password Length
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      return;
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
 
-    // If no errors, proceed with login and close modal
-    setError('');
-    if (onClose) {
-      onClose();
+      const data = await response.json();
+      console.log('Login successful:', data);
+    } catch (err) {
+      setError(err.message);
+      console.error('Login error:', err);
     }
-    console.log('Login successful');
   };
+  
 
   return (
     <Box sx={{ padding: 4, maxWidth: 400, margin: '0 auto', textAlign: 'center' }}>
@@ -109,16 +109,6 @@ const LoginForm = ({ onClose }) => {
       >
         Log in
       </Button>
-
-      <Typography variant="body2" sx={{ marginTop: 2 }}>
-        New to BiteCheck?{' '}
-        <Typography
-          component="span"
-          sx={{ color: 'primary.main', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Sign up
-        </Typography>
-      </Typography>
     </Box>
   );
 };

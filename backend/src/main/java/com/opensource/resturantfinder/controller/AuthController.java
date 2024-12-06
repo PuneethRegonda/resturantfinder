@@ -9,6 +9,8 @@ import com.opensource.resturantfinder.service.UserService;
 import com.opensource.resturantfinder.security.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,12 +40,15 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     @PostMapping("/signup")
     @Operation(summary = "User signup", description = "Register a new user")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> signup(
             @RequestBody SignupRequest signupRequest,
             @RequestHeader("X-Request-ID") String requestId) {
 
+        log.info("Signup request received: " + signupRequest);
         // Create the user
         userService.createUser(signupRequest.getUsername(), signupRequest.getEmail(), signupRequest.getPassword());
 
@@ -66,6 +71,8 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthenticationResponse>> createAuthenticationToken(
             @RequestBody AuthenticationRequest authenticationRequest,
             @RequestHeader("X-Request-ID") String requestId) {
+
+        log.info("login request received: {}" , authenticationRequest);
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(), authenticationRequest.getPassword())
