@@ -6,7 +6,6 @@ import {
   Grid,
   Card,
   CardMedia,
-  CardContent,
   Chip,
   Divider,
   Rating,
@@ -32,7 +31,9 @@ const RestaurantPage = () => {
 
   useEffect(() => {
     // Check login status on page load
-    setIsLoggedIn(Boolean(localStorage.getItem('token')));
+    const token = localStorage.getItem('authToken');
+    console.log('Token in localStorage:', token); // Debug token
+    setIsLoggedIn(Boolean(token)); // Update login status based on token
 
     getRestaurantDetails(id)
       .then((response) => {
@@ -157,10 +158,6 @@ const RestaurantPage = () => {
                 Visit
               </Button>
             </Typography>
-            <Typography>
-              Vegetarian Options: {details?.isVegetarian ? 'Yes' : 'No'}
-            </Typography>
-            <Typography>Vegan Options: {details?.isVegan ? 'Yes' : 'No'}</Typography>
           </Card>
         </Grid>
         <Grid item xs={12} md={6}>
