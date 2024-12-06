@@ -7,12 +7,12 @@ const RestaurantCard = ({ restaurant }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Current image index
 
   useEffect(() => {
-    if (restaurant.place_id) {
-      getPlacePhotos(restaurant.place_id, 200)
+    if (restaurant.id) {
+      getPlacePhotos(restaurant.id, 200)
         .then((urls) => setPhotoUrls(urls))
         .catch(() => setPhotoUrls(['https://via.placeholder.com/400']));
     }
-  }, [restaurant.place_id]);
+  }, [restaurant.id]);
 
   // Handle showing the next image
   const handleNextImage = () => {
@@ -119,13 +119,17 @@ const RestaurantCard = ({ restaurant }) => {
 
       {/* Content Section */}
       <Box sx={{ flex: 1 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 1 }}
-         component={Link}
-         to={`/restaurant/${restaurant.name.replace(/\s+/g, '-')}`}
-         target="_blank"
+      <Typography 
+          variant="h6" 
+          sx={{ fontWeight: 'bold', marginBottom: 1 }}
+          component={Link}
+          to={`/restaurant/${restaurant.id}/${encodeURIComponent(restaurant.name)}`}
+          state={{ id: restaurant.id, name: restaurant.name }}
+          target="_blank"
         >
           {restaurant.name}
-        </Typography>
+        </Typography> 
+       
         <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
           <Rating
             name="read-only"

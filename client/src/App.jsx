@@ -17,7 +17,8 @@ function App() {
         <Route path="/" element={<Home />} />
 
         {/* Restaurant Detail Page Route */}
-        <Route path="/restaurant/:placeId" element={<RestaurantPage />} />
+        <Route path="/restaurant/:id/:name" element={<RestaurantPage />} />
+
 
         <Route path="/business" element={<BusinessHome />} />
         <Route path="/views" element={<RestaurantListPage />} />

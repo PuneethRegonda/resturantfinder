@@ -9,13 +9,22 @@ public class RestaurantDTO {
     private Double latitude;
     private Double longitude;
     private String iconUrl;
-    private PriceRange priceLevel;
+    private Integer priceLevel;
     private Double rating;
     private Integer userRatingsTotal;
     private String vicinity;
     private RestaurantDetailsDTO details;
     private List<OperatingHoursDTO> operatingHours;
     private List<CategoryDTO> categories;
+    private String place_id;
+
+    public String getPlace_id() {
+        return place_id;
+    }
+
+    public void setPlace_id(String place_id) {
+        this.place_id = place_id;
+    }
 
     // Getters and setters
 
@@ -67,11 +76,11 @@ public class RestaurantDTO {
         this.iconUrl = iconUrl;
     }
 
-    public PriceRange getPriceLevel() {
+    public Integer getPriceLevel() {
         return priceLevel;
     }
 
-    public void setPriceLevel(PriceRange priceLevel) {
+    public void setPriceLevel(Integer priceLevel) {
         this.priceLevel = priceLevel;
     }
 
@@ -139,6 +148,7 @@ public class RestaurantDTO {
                 ", details=" + details +
                 ", operatingHours=" + operatingHours +
                 ", categories=" + categories +
+                ", place_id='" + place_id + '\'' +
                 '}';
     }
 }

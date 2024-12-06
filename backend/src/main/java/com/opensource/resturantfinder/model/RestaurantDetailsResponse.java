@@ -14,7 +14,7 @@ public class RestaurantDetailsResponse {
     private Double latitude;
     private Double longitude;
     private String iconUrl;
-    private PriceRange priceLevel;
+    private Integer priceLevel;
     private Double rating; // Average rating (if stored directly in the entity)
     private Integer userRatingsTotal;
     private String vicinity;
@@ -32,7 +32,7 @@ public class RestaurantDetailsResponse {
             Double latitude,
             Double longitude,
             String iconUrl,
-            PriceRange priceLevel,
+            Integer priceLevel,
             Double rating,
             Integer userRatingsTotal,
             String vicinity,
@@ -100,11 +100,11 @@ public class RestaurantDetailsResponse {
         this.iconUrl = iconUrl;
     }
 
-    public PriceRange getPriceLevel() {
+    public Integer getPriceLevel() {
         return priceLevel;
     }
 
-    public void setPriceLevel(PriceRange priceLevel) {
+    public void setPriceLevel(Integer priceLevel) {
         this.priceLevel = priceLevel;
     }
 

@@ -6,14 +6,14 @@ import { getRestaurantDetails, getPhotoUrl } from '../../services/restaurantServ
 import WriteReviewForm from '../../components/WriteReview';
 
 const RestaurantPage = () => {
-  const { name } = useParams();
+  const { id, name } = useParams();
   const [restaurant, setRestaurant] = React.useState(null);
   const [reviews, setReviews] = useState([]);
   const [openReviewDialog, setOpenReviewDialog] = useState(false);
 
   React.useEffect(() => {
     // Fetch restaurant details based on name
-    getRestaurantDetails(name).then((data) => {
+    getRestaurantDetails(id).then((data) => {
       if (data && data.name) {
         setRestaurant(data);
         setReviews(data.reviews || []); // Set initial reviews

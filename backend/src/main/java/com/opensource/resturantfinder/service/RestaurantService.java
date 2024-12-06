@@ -3,8 +3,6 @@ package com.opensource.resturantfinder.service;
 import com.opensource.resturantfinder.entity.*;
 import com.opensource.resturantfinder.exception.ResourceNotFoundException;
 import com.opensource.resturantfinder.model.*;
-import com.opensource.resturantfinder.model.ReviewResponse;
-
 import com.opensource.resturantfinder.repository.CategoryRepository;
 import com.opensource.resturantfinder.repository.RestaurantRepository;
 import com.opensource.resturantfinder.repository.ReviewRepository;
@@ -19,16 +17,16 @@ import java.util.stream.Collectors;
 @Transactional
 public class RestaurantService {
 
-    @Autowired
-    private ReviewRepository reviewRepository;
-
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
-    public RestaurantService(RestaurantRepository restaurantRepository, CategoryRepository categoryRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, CategoryRepository categoryRepository,ReviewRepository reviewRepository) {
         this.restaurantRepository = restaurantRepository;
         this.categoryRepository = categoryRepository;
+        this.reviewRepository = reviewRepository;
+
     }
 
     public Restaurant addRestaurant(RestaurantRequest request) {
@@ -38,7 +36,7 @@ public class RestaurantService {
         restaurant.setLatitude(request.getLatitude());
         restaurant.setLongitude(request.getLongitude());
         restaurant.setIconUrl(request.getIconUrl());
-        restaurant.setPriceLevel(PriceRange.fromValue(request.getPriceLevel()));
+        restaurant.setPriceLevel(request.getPriceLevel());
         restaurant.setRating(request.getRating());
         restaurant.setUserRatingsTotal(request.getUserRatingsTotal());
         restaurant.setVicinity(request.getVicinity());
@@ -72,7 +70,7 @@ public class RestaurantService {
 
     public RestaurantDetailsResponse getRestaurantDetails(Long restaurantId, String sortBy) {
         // Fetch restaurant details
-        Restaurant restaurant = restaurantRepository.findWithDetailsById(restaurantId)
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
 
         // Fetch reviews based on sort order
@@ -92,7 +90,6 @@ public class RestaurantService {
         Double averageRating = reviewRepository.findAverageRatingByRestaurantId(restaurantId);
         Long totalReviews = reviewRepository.findReviewCountByRestaurantId(restaurantId);
 
-        // Build response
         return new RestaurantDetailsResponse(
                 restaurant.getName(),
                 restaurant.getBusinessStatus(),
@@ -106,9 +103,12 @@ public class RestaurantService {
                 restaurant.getDetails(),
                 restaurant.getOperatingHours(),
                 restaurant.getCategories(),
-                reviews.stream().map(ReviewResponse::new).collect(Collectors.toList()),
+                reviews.stream()
+                        .map(ReviewResponse::new)
+                        .collect(Collectors.toList()),
                 averageRating,
                 totalReviews
         );
     }
-    }
+
+}

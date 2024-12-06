@@ -26,12 +26,18 @@ import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 
 const AppHeader = ({ onSearch }) => {
-  const [cuisineType, setCuisineType] = useState('');
-  const [foodType, setFoodType] = useState('');
-  const [priceLevel, setPriceLevel] = useState('');
-  const [rating, setRating] = useState('');
+  // Central filters state
+  const [filters, setFilters] = useState({
+    cuisineType: '',
+    foodType: '',
+    priceLevel: '',
+    rating: '',
+  });
 
+  // Snackbar state for showing errors
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  // Dialog states for Login and Signup
   const [openLoginDialog, setOpenLoginDialog] = useState(false);
   const [openSignupDialog, setOpenSignupDialog] = useState(false);
 
@@ -44,14 +50,29 @@ const AppHeader = ({ onSearch }) => {
     setIsLoggedIn(!!token);
   }, []);
 
-  // Handle search with filters
   const handleSearch = (triggeredBy, query, isValid) => {
-    if (isValid) {
-      onSearch(triggeredBy, query, isValid);
-    } else {
-      setOpenSnackbar(true);
+    if (!isValid) {
+      console.warn("Invalid search input");
+      setOpenSnackbar(true); // Show error notification
+      return;
     }
+  
+    // Prepare the search payload
+    const searchPayload = {
+      ...filters, // Include selected filters
+      name: query.trim() || '', // Set search bar query
+      page: 0, // Reset to first page on new search
+      size: 20, // Default page size
+      sortBy: 'rating', // Default sorting
+    };
+  
+    console.log("Triggering search with payload:", searchPayload); // Debugging purposes
+    onSearch(triggeredBy, searchPayload, true); // Pass the payload to parent component
   };
+  
+
+
+  
 
   const handleLogout = () => {
     localStorage.removeItem('authToken'); // Clear token on logout
@@ -95,7 +116,89 @@ const AppHeader = ({ onSearch }) => {
 
           {/* Filters Section */}
           <Box sx={{ display: 'flex', gap: 2, marginX: 4 }}>
-            {/* Add filter dropdowns here */}
+            {/* Cuisine Type Filter */}
+            <FormControl variant="standard" sx={{ minWidth: 120 }}>
+              <InputLabel>Cuisine</InputLabel>
+              <Select
+                value={filters.cuisineType}
+                onChange={(e) =>
+                  setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    cuisineType: e.target.value,
+                  }))
+                }
+                label="Cuisine"
+              >
+                <MenuItem value="Indian">Indian</MenuItem>
+                <MenuItem value="Mexican">Mexican</MenuItem>
+                <MenuItem value="Italian">Italian</MenuItem>
+                <MenuItem value="French">French</MenuItem>
+                <MenuItem value="Chinese">Chinese</MenuItem>
+                <MenuItem value="Thai">Thai</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Food Type Filter */}
+            <FormControl variant="standard" sx={{ minWidth: 120 }}>
+              <InputLabel>Food Type</InputLabel>
+              <Select
+                value={filters.foodType}
+                onChange={(e) =>
+                  setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    foodType: e.target.value,
+                  }))
+                }
+                label="Food Type"
+              >
+                <MenuItem value="Vegetarian">Vegetarian</MenuItem>
+                <MenuItem value="Vegan">Vegan</MenuItem>
+                <MenuItem value="Gluten-Free">Gluten-Free</MenuItem>
+                <MenuItem value="Organic">Organic</MenuItem>
+                <MenuItem value="Seafood">Seafood</MenuItem>
+                <MenuItem value="Non-Veg">Non-Veg</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Price Level Filter */}
+            <FormControl variant="standard" sx={{ minWidth: 120 }}>
+              <InputLabel>Price</InputLabel>
+              <Select
+                value={filters.priceLevel}
+                onChange={(e) =>
+                  setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    priceLevel: e.target.value,
+                  }))
+                }
+                label="Price"
+              >
+                <MenuItem value="low">Low</MenuItem>
+                <MenuItem value="medium">Medium</MenuItem>
+                <MenuItem value="high">High</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Rating Filter */}
+            <FormControl variant="standard" sx={{ minWidth: 120 }}>
+              <InputLabel>Rating</InputLabel>
+              <Select
+                value={filters.rating}
+                onChange={(e) =>
+                  setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    rating: e.target.value,
+                  }))
+                }
+                label="Rating"
+              >
+                <MenuItem value={1}>1 Star</MenuItem>
+                <MenuItem value={2}>2 Stars</MenuItem>
+                <MenuItem value={3}>3 Stars</MenuItem>
+                <MenuItem value={4}>4 Stars</MenuItem>
+                <MenuItem value={5}>5 Stars</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
 
           {/* Search Section */}
@@ -108,7 +211,7 @@ const AppHeader = ({ onSearch }) => {
               marginX: 4,
             }}
           >
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar onSearch={(query, isValid) => handleSearch('SearchBar', query, isValid)} />
           </Box>
 
           {/* Auth Section */}
@@ -164,63 +267,6 @@ const AppHeader = ({ onSearch }) => {
           </Box>
         </Toolbar>
       </AppBar>
-
-      {/* Login Dialog */}
-      <Dialog open={openLoginDialog} onClose={() => setOpenLoginDialog(false)}>
-  <DialogTitle>
-    Sign in to Bite Check
-    <IconButton
-      aria-label="close"
-      onClick={() => setOpenLoginDialog(false)}
-      sx={{
-        position: 'absolute',
-        right: 8,
-        top: 8,
-        color: (theme) => theme.palette.grey[500],
-      }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </DialogTitle>
-  <DialogContent>
-    <LoginForm
-    onClose={() => setOpenLoginDialog(false)}
-    onLoginSuccess={() => {
-      setIsLoggedIn(true); // Update AppHeader state
-      setOpenLoginDialog(false); // Close login dialog
-    }}
-  />
-  </DialogContent>
-</Dialog>
-
-
-      {/* Signup Dialog */}
-      <Dialog open={openSignupDialog} onClose={() => setOpenSignupDialog(false)}>
-        <DialogTitle>
-          Sign up for Bite Check
-          <IconButton
-            aria-label="close"
-            onClick={() => setOpenSignupDialog(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-        <RegisterForm
-          onClose={() => setOpenSignupDialog(false)}
-          onSignupSuccess={() => {
-            setIsLoggedIn(true); // Update AppHeader state
-            setOpenSignupDialog(false); // Close signup dialog
-          }}
-        />
-        </DialogContent>
-      </Dialog>
 
       {/* Snackbar */}
       <Snackbar

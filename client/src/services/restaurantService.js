@@ -1,37 +1,34 @@
 // Function to search restaurants by query using your Spring Boot backend
 const BASE_URL = 'http://localhost:5000';
 
-export const searchRestaurants = async (query, lat, lng) => {
-  try {
-    // Destructure filters
-    // const { cuisineType, foodType, priceLevel, minRating } = filters;
+import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
 
-    // Construct query parameters
-    const queryParams = new URLSearchParams();
-    if (query) queryParams.append('query', query);
-    // if (cuisineType) queryParams.append('cuisineType', cuisineType);
-    // if (foodType) queryParams.append('foodType', foodType);
-    // if (priceLevel) queryParams.append('priceLevel', priceLevel);
-    // if (minRating) queryParams.append('minRating', minRating);
+export const searchRestaurants = async ({ page = 0, size = 10, ...filters }) => {
+  const priceLevelMap = { LOW: 1, MEDIUM: 2, HIGH: 3 };
 
-    const response = await fetch(`${BASE_URL}/api/search-restaurants?${queryParams.toString()}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  const queryParams = new URLSearchParams({
+    page,
+    size,
+    ...Object.entries(filters).reduce((acc, [key, value]) => {
+      if (key === 'priceLevel' && value) {
+        acc[key] = priceLevelMap[value.toUpperCase()] || '';
+      } else if (value) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {}),
+  }).toString();
 
-    if (response.ok) {
-      const data = await response.json();
-      return data.results; // Assuming the API returns an array of restaurant objects
-    } else {
-      console.error(`Error from backend search API (${response.status}): ${response.statusText}`);
-      return [];
-    }
-  } catch (error) {
-    console.error('Error during restaurant search:', error);
-    return [];
+
+ 
+
+  const response = await fetchWithRequestId(`/api/restaurants/search?${queryParams}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch restaurants');
   }
+  return await response.json();
 };
+
 
 // Function to get nearby restaurants using the Spring Boot backend
 export const getNearbyRestaurants = async (lat, lng) => {
@@ -90,16 +87,15 @@ export const checkPincodeValidity = async (pincode) => {
   }
 };
 
-export const getRestaurantDetails = async (name) => {
+export const getRestaurantDetails = async (id) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/get-restaurant-details?name=${encodeURIComponent(name)}`);
+    const response = await fetch(`/api/restaurants/${id}?sortBy=recent`);
     if (response.ok) {
       const data = await response.json();
-      if (data.results && data.results.length > 0) {
-        // Assuming we need to return the first result
-        return data.results[0];
+      if (data.status === 'success' && data.data) {
+        return data.data;
       } else {
-        throw new Error("No restaurant details found for the given name");
+        throw new Error("No restaurant details found for the given ID");
       }
     } else {
       throw new Error('Failed to fetch restaurant details');
