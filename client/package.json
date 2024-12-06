@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@date-io/date-fns": "^2.16.0",
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
     "@mui/icons-material": "^6.1.7",
-    "@mui/material": "^6.1.9",
+    "@mui/material": "^6.1.10",
     "@mui/x-date-pickers": "^7.22.3",
     "@react-google-maps/api": "^2.20.3",
     "date-fns": "^2.30.0",
