@@ -48,6 +48,9 @@ const RestaurantListPage = () => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('authToken'); // Clear token on logout
+    localStorage.removeItem('userRoles'); // Clear token on logout
+
     navigate("/");
   };
 

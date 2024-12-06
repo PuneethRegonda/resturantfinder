@@ -184,6 +184,9 @@ const EditRestaurant = () => {
   const handleLogout = () => {
     // Clear user session or token
     console.log("Logging out...");
+    localStorage.removeItem('authToken'); // Clear token on logout
+    localStorage.removeItem('userRoles'); // Clear token on logout
+
     // Redirect to login page or perform other logout actions
     navigate("/");
   };

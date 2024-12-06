@@ -76,6 +76,7 @@ const AppHeader = ({ onSearch }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('authToken'); // Clear token on logout
+    localStorage.removeItem('userRoles'); // Clear token on logout
     setIsLoggedIn(false);
     setAnchorEl(null); // Close user menu
   };
