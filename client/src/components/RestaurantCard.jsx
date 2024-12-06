@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getPlacePhotos } from '../services/restaurantService';
 import { Card, Box, Typography, Chip, Button, Rating } from '@mui/material';
 import { Link } from 'react-router-dom';
-const RestaurantCard = ({ restaurant }) => {
+const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked }) => {
   const [photoUrls, setPhotoUrls] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Current image index
 
@@ -36,6 +36,13 @@ const RestaurantCard = ({ restaurant }) => {
         marginBottom: 2,
       }}
     >
+      {showCheckbox && (
+        <Checkbox
+          checked={isChecked}
+          onChange={() => onCheckboxChange(restaurant.id)}
+        />
+      )}
+      
       {/* Image Section */}
       <Box
         sx={{

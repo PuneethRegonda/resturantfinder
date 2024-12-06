@@ -8,7 +8,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import BusinessHome from './pages/Business/Business_home';
 import RestaurantListPage from './pages/Business/View';
 import EditRestaurant from './pages/Business/Edit';
-
+import AdminDuplicateRestaurants from './pages/Admin/AdminDuplicateRestaurants'
 function App() {
   return (
     <Router>
@@ -18,6 +18,7 @@ function App() {
         <Route path="/business" element={<BusinessHome />} />
         <Route path="/views" element={<RestaurantListPage />} />
         <Route path="/edit" element={<EditRestaurant />} />
+        <Route path="/admin/duplicate-restaurants" element={<AdminDuplicateRestaurants />} />
       </Routes>
     </Router>
   );
