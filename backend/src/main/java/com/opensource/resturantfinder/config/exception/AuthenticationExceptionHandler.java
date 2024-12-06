@@ -18,23 +18,30 @@ import java.util.Collections;
 @ControllerAdvice
 public class AuthenticationExceptionHandler {
 
-    // Handle DataIntegrityViolationException (e.g., duplicate keys)
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
-        String requestId = request.getHeader("X-Request-ID");
-
-        // Extract meaningful details from the exception
-        String detailedMessage = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
-
-        ErrorDetails errorDetails = new ErrorDetails(
-                "DUPLICATE_ENTRY",
-                "User already exists in our records",
-                Collections.singletonList(detailedMessage)
-        );
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(errorDetails, requestId));
-    }
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
+            String requestId = request.getHeader("X-Request-ID");
+        
+            // Extract the root cause for better insights
+            String detailedMessage = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+        
+            String userFriendlyMessage = "There was a conflict with the data provided. Please check and try again.";
+            if (detailedMessage.contains("not-null property")) {
+                userFriendlyMessage = "A required field is missing. Ensure all mandatory fields are provided.";
+            } else if (detailedMessage.contains("duplicate key")) {
+                userFriendlyMessage = "A record with the same key already exists. Please use unique values.";
+            }
+        
+            ErrorDetails errorDetails = new ErrorDetails(
+                    "DUPLICATE_ENTRY",
+                    userFriendlyMessage,
+                    Collections.singletonList(detailedMessage)
+            );
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error(errorDetails, requestId));
+        }
+        
 
     // Handle Bad Credentials (wrong email or password)
     @ExceptionHandler(BadCredentialsException.class)

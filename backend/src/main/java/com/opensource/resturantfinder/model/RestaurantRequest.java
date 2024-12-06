@@ -77,7 +77,7 @@ public class RestaurantRequest {
     }
 
     public void setRating(Double rating) {
-        this.rating = rating;
+        this.rating = rating != null ? rating : null;
     }
 
     public Integer getUserRatingsTotal() {
@@ -85,7 +85,7 @@ public class RestaurantRequest {
     }
 
     public void setUserRatingsTotal(Integer userRatingsTotal) {
-        this.userRatingsTotal = userRatingsTotal;
+        this.userRatingsTotal = userRatingsTotal != null ? userRatingsTotal : null;
     }
 
     public String getVicinity() {

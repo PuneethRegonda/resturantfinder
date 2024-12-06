@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +30,9 @@ public class RestaurantService {
 
     }
 
+    @Transactional
     public Restaurant addRestaurant(RestaurantRequest request) {
+        // Create a new Restaurant object
         Restaurant restaurant = new Restaurant();
         restaurant.setName(request.getName());
         restaurant.setBusinessStatus(request.getBusinessStatus());
@@ -40,33 +43,45 @@ public class RestaurantService {
         restaurant.setRating(request.getRating());
         restaurant.setUserRatingsTotal(request.getUserRatingsTotal());
         restaurant.setVicinity(request.getVicinity());
-
+        restaurant.setOwner(null);
+        // Map details
         RestaurantDetails details = new RestaurantDetails();
-
         details.setDescription(request.getDescription());
         details.setPhoneNumber(request.getPhoneNumber());
         details.setWebsite(request.getWebsite());
         details.setCuisineType(request.getCuisineType());
         details.setIsVegetarian(request.getIsVegetarian());
         details.setIsVegan(request.getIsVegan());
-
-        for (String categoryName : request.getCategories()) {
-            Category category = categoryRepository.findByName(categoryName)
-                    .orElseGet(() -> categoryRepository.save(new Category(categoryName)));
-            restaurant.getCategories().add(category);
-        }
-
-        for (OperatingHoursRequest hourRequest : request.getOperatingHours()) {
+        details.setRestaurant(restaurant); // Link details back to the restaurant
+    
+        // Map categories
+        Set<Category> categories = request.getCategories().stream()
+                .map(name -> categoryRepository.findByName(name)
+                        .orElseGet(() -> categoryRepository.save(new Category(name))))
+                .collect(Collectors.toSet());
+        restaurant.setCategories(categories);
+    
+        // Map operating hours
+        List<OperatingHours> operatingHours = request.getOperatingHours().stream()
+        .map(req -> {
             OperatingHours hours = new OperatingHours();
-            hours.setDayOfWeek(hourRequest.getDayOfWeek());
-            hours.setOpenTime(hourRequest.getOpenTime());
-            hours.setCloseTime(hourRequest.getCloseTime());
-            restaurant.getOperatingHours().add(hours);
-        }
+            hours.setDayOfWeek(req.getDayOfWeek());
+            hours.setOpenTime(req.getOpenTime());
+            hours.setCloseTime(req.getCloseTime());
+            return hours;
+        })
+        .collect(Collectors.toList());
+restaurant.setOperatingHours(operatingHours);
+
+    
+        // Set details
         restaurant.setDetails(details);
-        details.setRestaurant(restaurant);
+    
+        // Save the restaurant
         return restaurantRepository.save(restaurant);
     }
+    
+
 
     public RestaurantDetailsResponse getRestaurantDetails(Long restaurantId, String sortBy) {
         // Fetch restaurant details
