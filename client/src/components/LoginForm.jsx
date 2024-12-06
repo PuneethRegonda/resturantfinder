@@ -1,33 +1,50 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, TextField, Divider, Alert } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
+import API_ENDPOINTS from '../apiConfig'; // Import the centralized API URLs
+import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
 
-const LoginForm = ({ onClose }) => {
+const LoginForm = ({ onClose, onLoginSuccess }) => { // Added onLoginSuccess prop
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  // Handle login logic with validation
-  const handleLogin = () => {
-    // Validate Email
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
+  const handleLogin = async () => {
+    try {
+      const response = await fetchWithRequestId(API_ENDPOINTS.AUTH.LOGIN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Validate Password Length
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      return;
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData?.error?.message || 'Login failed');
+      }
 
-    // If no errors, proceed with login and close modal
-    setError('');
-    if (onClose) {
-      onClose();
+      const data = await response.json();
+      if (data.status === 'success' && data.data.token) {
+        const token = data.data.token;
+
+        // Save the token to localStorage
+        localStorage.setItem('authToken', token);
+
+        // Notify parent about login success
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
+
+        // Close the login form
+        if (onClose) {
+          onClose();
+        }
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Login error:', err);
     }
-    console.log('Login successful');
   };
 
   return (
@@ -55,13 +72,13 @@ const LoginForm = ({ onClose }) => {
         sx={{
           marginBottom: 2,
           padding: '8px',
-          borderColor: '#dcdcdc', // Light gray border color to match
-          borderRadius: '50px', // Rounded corners to match the screenshots
-          color: '#000', // Text color similar to Google button
+          borderColor: '#dcdcdc',
+          borderRadius: '50px',
+          color: '#000',
           textTransform: 'none',
-          fontSize: '16px', // Slightly larger font
+          fontSize: '16px',
           ':hover': {
-            backgroundColor: '#f7f7f7', // Hover effect similar to the screenshot
+            backgroundColor: '#f7f7f7',
             borderColor: '#dcdcdc',
           },
         }}
@@ -100,25 +117,13 @@ const LoginForm = ({ onClose }) => {
         fullWidth
         onClick={handleLogin}
         sx={{
-          backgroundColor: '#d32323', // Set button color to red
-          '&:hover': {
-            backgroundColor: '#b71c1c', // Darker red on hover
-          },
+          backgroundColor: '#d32323',
+          '&:hover': { backgroundColor: '#b71c1c' },
           marginBottom: 2,
         }}
       >
         Log in
       </Button>
-
-      <Typography variant="body2" sx={{ marginTop: 2 }}>
-        New to BiteCheck?{' '}
-        <Typography
-          component="span"
-          sx={{ color: 'primary.main', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Sign up
-        </Typography>
-      </Typography>
     </Box>
   );
 };

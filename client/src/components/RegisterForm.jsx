@@ -1,41 +1,70 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, TextField, Divider, Alert } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
+import API_ENDPOINTS from '../apiConfig'; // Import the centralized API URLs
+import { fetchWithRequestId } from '../utils/api'; // Adjust the import path as needed
 
-const RegisterForm = ({ onClose }) => {
+const RegisterForm = ({ onClose, onSignupSuccess }) => { // Added onSignupSuccess prop
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
 
-  // Handle registration logic with validation
-  const handleSubmit = () => {
-    // Validate Email
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
+  const handleSubmit = async () => {
+    try {
+      // Validate Email
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) {
+        setError('Please enter a valid email address.');
+        return;
+      }
 
-    // Validate Password Length
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      return;
-    }
+      // Validate Password Length
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters long.');
+        return;
+      }
 
-    // Validate Password Match
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
+      // Validate Password Match
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.');
+        return;
+      }
 
-    // If no errors, proceed with registration
-    setError('');
-    console.log('Registration successful');
+      // Send the signup request
+      const response = await fetchWithRequestId(API_ENDPOINTS.AUTH.SIGNUP, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Call the onClose function to close the modal after a successful registration
-    if (onClose) {
-      onClose();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData?.error?.message || 'Signup failed');
+      }
+
+      const data = await response.json();
+      if (data.status === 'success' && data.data.token) {
+        const token = data.data.token;
+
+        // Save the token to localStorage
+        localStorage.setItem('authToken', token);
+
+        // Notify parent about signup success
+        if (onSignupSuccess) {
+          onSignupSuccess();
+        }
+
+        // Close the signup form
+        if (onClose) {
+          onClose();
+        }
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Signup error:', err);
     }
   };
 
@@ -64,13 +93,13 @@ const RegisterForm = ({ onClose }) => {
         sx={{
           marginBottom: 2,
           padding: '8px',
-          borderColor: '#dcdcdc', // Light gray border color to match
-          borderRadius: '50px', // Rounded corners to match the screenshots
-          color: '#000', // Text color similar to Google button
+          borderColor: '#dcdcdc',
+          borderRadius: '50px',
+          color: '#000',
           textTransform: 'none',
-          fontSize: '16px', // Slightly larger font
+          fontSize: '16px',
           ':hover': {
-            backgroundColor: '#f7f7f7', // Hover effect similar to the screenshot
+            backgroundColor: '#f7f7f7',
             borderColor: '#dcdcdc',
           },
         }}
@@ -118,26 +147,16 @@ const RegisterForm = ({ onClose }) => {
         fullWidth
         onClick={handleSubmit}
         sx={{
-          backgroundColor: '#d32323', // Red color to match the login button
-          color: '#fff', // Text color should be white
+          backgroundColor: '#d32323',
+          color: '#fff',
           marginBottom: 2,
           ':hover': {
-            backgroundColor: '#b51e1e', // Darker shade on hover
+            backgroundColor: '#b51e1e',
           },
         }}
       >
         Sign up
       </Button>
-
-      <Typography variant="body2" sx={{ marginTop: 2 }}>
-        Already on BiteCheck?{' '}
-        <Typography
-          component="span"
-          sx={{ color: 'primary.main', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Log in
-        </Typography>
-      </Typography>
     </Box>
   );
 };
