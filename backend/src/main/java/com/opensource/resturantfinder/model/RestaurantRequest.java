@@ -3,6 +3,7 @@ package com.opensource.resturantfinder.model;
 import java.util.List;
 
 public class RestaurantRequest {
+    private String owner;
     private String name;
     private String businessStatus;
     private Double latitude;
@@ -23,7 +24,13 @@ public class RestaurantRequest {
 
     // Getters and setters
 
+    public String getOwner() {
+        return owner;
+    }
 
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
     public String getName() {
         return name;
     }
