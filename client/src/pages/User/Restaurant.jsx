@@ -11,6 +11,11 @@ import {
   Divider,
   Rating,
   Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { getRestaurantDetails } from '../../services/restaurantService';
@@ -19,6 +24,8 @@ const RestaurantPage = () => {
   const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [newReview, setNewReview] = useState({ rating: 0, text: '' });
 
   const placeholderImage = "https://via.placeholder.com/800x400?text=Restaurant+Image"; // Online placeholder image
 
@@ -39,6 +46,34 @@ const RestaurantPage = () => {
       });
   }, [id]);
 
+  // Check if user is logged in by verifying the token in localStorage
+  const isLoggedIn = Boolean(localStorage.getItem('token'));
+``
+  const handleOpenReviewDialog = () => {
+    if (isLoggedIn) {
+      setIsReviewDialogOpen(true);
+    } else {
+      alert('You need to log in to write a review!');
+    }
+  };
+
+  const handleCloseReviewDialog = () => {
+    setIsReviewDialogOpen(false);
+    setNewReview({ rating: 0, text: '' });
+  };
+
+  const handleSubmitReview = () => {
+    if (newReview.rating > 0 && newReview.text.trim()) {
+      setReviews((prev) => [
+        ...prev,
+        { userName: 'You', rating: newReview.rating, reviewText: newReview.text },
+      ]);
+      handleCloseReviewDialog();
+    } else {
+      alert('Please provide a rating and review text!');
+    }
+  };
+
   if (!restaurant) {
     return <Typography variant="h6">Invalid restaurant data.</Typography>;
   }
@@ -56,7 +91,23 @@ const RestaurantPage = () => {
   } = restaurant;
 
   return (
-    <Box sx={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
+    <Box sx={{ padding: '40px', maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
+      {/* Write a Review Button */}
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          padding: '10px 20px',
+          borderRadius: '20px',
+        }}
+        onClick={handleOpenReviewDialog}
+      >
+        Write a Review
+      </Button>
+
       {/* Header Section */}
       <Box
         sx={{
@@ -214,6 +265,33 @@ const RestaurantPage = () => {
           />
         </Card>
       </Box>
+
+      {/* Write a Review Dialog */}
+      <Dialog open={isReviewDialogOpen} onClose={handleCloseReviewDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>Write a Review</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Rating
+              value={newReview.rating}
+              onChange={(e, newValue) => setNewReview((prev) => ({ ...prev, rating: newValue }))}
+            />
+            <TextField
+              label="Write your review"
+              multiline
+              rows={4}
+              value={newReview.text}
+              onChange={(e) => setNewReview((prev) => ({ ...prev, text: e.target.value }))}
+              fullWidth
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseReviewDialog}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={handleSubmitReview}>
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
