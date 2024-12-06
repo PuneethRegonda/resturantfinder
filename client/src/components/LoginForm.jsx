@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, TextField, Divider, Alert } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
-import API_ENDPOINTS from '../apiConfig'; // Import the centralized API URLs
-import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
+import API_ENDPOINTS from '../apiConfig';
+import { fetchWithRequestId } from '../utils/api';
 
-const LoginForm = ({ onClose, onLoginSuccess }) => { // Added onLoginSuccess prop
+const LoginForm = ({ onClose, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,17 +24,15 @@ const LoginForm = ({ onClose, onLoginSuccess }) => { // Added onLoginSuccess pro
 
       const data = await response.json();
       if (data.status === 'success' && data.data.token) {
-        const token = data.data.token;
+        const { token, roles } = data.data;
 
-        // Save the token to localStorage
         localStorage.setItem('authToken', token);
+        localStorage.setItem('userRoles', JSON.stringify(roles));
 
-        // Notify parent about login success
         if (onLoginSuccess) {
-          onLoginSuccess();
+          onLoginSuccess(roles);
         }
 
-        // Close the login form
         if (onClose) {
           onClose();
         }

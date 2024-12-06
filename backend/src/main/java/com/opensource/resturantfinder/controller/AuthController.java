@@ -4,6 +4,7 @@ package com.opensource.resturantfinder.controller;
 import com.opensource.resturantfinder.common.ApiResponse;
 import com.opensource.resturantfinder.model.*;
 import com.opensource.resturantfinder.entity.User;
+import com.opensource.resturantfinder.service.CustomUserDetailsService;
 import com.opensource.resturantfinder.service.GoogleAuthService;
 import com.opensource.resturantfinder.service.UserService;
 import com.opensource.resturantfinder.security.JwtUtil;
@@ -18,6 +19,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -60,8 +63,10 @@ public class AuthController {
         // Generate JWT token
         final UserDetails userDetails = userDetailsService.loadUserByUsername(signupRequest.getEmail());
         final String jwt = jwtUtil.generateToken(userDetails.getUsername());
+        User user = ((CustomUserDetailsService) userDetailsService).findByEmail(userDetails.getUsername());
+        List<String> roles = user.getRoles().stream().toList();
 
-        AuthenticationResponse authResponse = new AuthenticationResponse(jwt);
+        AuthenticationResponse authResponse = new AuthenticationResponse(jwt, roles);
         return ResponseEntity.ok(ApiResponse.success(authResponse, requestId));
     }
 
@@ -81,7 +86,11 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        AuthenticationResponse authResponse = new AuthenticationResponse(jwt);
+        // Get user roles
+        User user = ((CustomUserDetailsService) userDetailsService).findByEmail(userDetails.getUsername());
+        List<String> roles = user.getRoles().stream().toList();
+
+        AuthenticationResponse authResponse = new AuthenticationResponse(jwt, roles);
         return ResponseEntity.ok(ApiResponse.success(authResponse, requestId));
     }
 
@@ -101,8 +110,9 @@ public class AuthController {
 
         // Generate JWT token
         final String jwt = jwtUtil.generateToken(user.getUsername());
+        List<String> roles = user.getRoles().stream().toList();
 
-        AuthenticationResponse authResponse = new AuthenticationResponse(jwt);
+        AuthenticationResponse authResponse = new AuthenticationResponse(jwt,roles);
         return ResponseEntity.ok(ApiResponse.success(authResponse, requestId));
     }
 }

@@ -9,6 +9,7 @@ import BusinessHome from './pages/Business/Business_home';
 import RestaurantListPage from './pages/Business/View';
 import EditRestaurant from './pages/Business/Edit';
 import AdminDuplicateRestaurants from './pages/Admin/AdminDuplicateRestaurants'
+import BusinessAdminLogin from './components/BusinessAdminLogin';
 function App() {
   return (
     <Router>
@@ -19,6 +20,8 @@ function App() {
         <Route path="/views" element={<RestaurantListPage />} />
         <Route path="/edit" element={<EditRestaurant />} />
         <Route path="/admin/duplicate-restaurants" element={<AdminDuplicateRestaurants />} />
+      
+        <Route path="/business-admin-login" element={<BusinessAdminLogin />} />
       </Routes>
     </Router>
   );
