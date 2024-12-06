@@ -60,7 +60,7 @@ const MapContainer = ({ places, userLocation }) => {
             if (position.lat && position.lng) {
               return (
                 <Marker
-                  key={place.place_id}
+                  key={place.place_id || place.id }
                   position={position}
                   onMouseOver={() => handleMarkerMouseOver(place)}
                   onMouseOut={handleMarkerMouseOut}
