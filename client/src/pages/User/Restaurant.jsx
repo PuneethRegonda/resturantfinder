@@ -26,13 +26,16 @@ const RestaurantPage = () => {
   const [reviews, setReviews] = useState([]);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const [newReview, setNewReview] = useState({ rating: 0, text: '' });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const placeholderImage = "https://via.placeholder.com/800x400?text=Restaurant+Image"; // Online placeholder image
 
   useEffect(() => {
+    // Check login status on page load
+    setIsLoggedIn(Boolean(localStorage.getItem('token')));
+
     getRestaurantDetails(id)
       .then((response) => {
-        console.log('API Response:', response);
         if (response?.name) {
           setRestaurant(response);
           setReviews(response.reviews || []);
@@ -46,14 +49,9 @@ const RestaurantPage = () => {
       });
   }, [id]);
 
-  // Check if user is logged in by verifying the token in localStorage
-  const isLoggedIn = Boolean(localStorage.getItem('token'));
-``
   const handleOpenReviewDialog = () => {
     if (isLoggedIn) {
       setIsReviewDialogOpen(true);
-    } else {
-      alert('You need to log in to write a review!');
     }
   };
 
@@ -96,12 +94,15 @@ const RestaurantPage = () => {
       <Button
         variant="contained"
         color="primary"
+        disabled={!isLoggedIn} // Disable if user is not logged in
         sx={{
           position: 'absolute',
           top: '20px',
           right: '20px',
           padding: '10px 20px',
           borderRadius: '20px',
+          cursor: isLoggedIn ? 'pointer' : 'not-allowed',
+          opacity: isLoggedIn ? 1 : 0.6,
         }}
         onClick={handleOpenReviewDialog}
       >
