@@ -265,6 +265,61 @@ const AppHeader = ({ onSearch }) => {
               </>
             )}
           </Box>
+
+          {/* Login Dialog */}
+      <Dialog open={openLoginDialog} onClose={() => setOpenLoginDialog(false)}>
+  <DialogTitle>
+    Sign in to Bite Check
+    <IconButton
+      aria-label="close"
+      onClick={() => setOpenLoginDialog(false)}
+      sx={{
+        position: 'absolute',
+        right: 8,
+        top: 8,
+        color: (theme) => theme.palette.grey[500],
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  <DialogContent>
+    <LoginForm
+    onClose={() => setOpenLoginDialog(false)}
+    onLoginSuccess={() => {
+      setIsLoggedIn(true); // Update AppHeader state
+      setOpenLoginDialog(false); // Close login dialog
+    }}
+  />
+  </DialogContent>
+</Dialog>
+      {/* Signup Dialog */}
+      <Dialog open={openSignupDialog} onClose={() => setOpenSignupDialog(false)}>
+        <DialogTitle>
+          Sign up for Bite Check
+          <IconButton
+            aria-label="close"
+            onClick={() => setOpenSignupDialog(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+        <RegisterForm
+          onClose={() => setOpenSignupDialog(false)}
+          onSignupSuccess={() => {
+            setIsLoggedIn(true); // Update AppHeader state
+            setOpenSignupDialog(false); // Close signup dialog
+          }}
+        />
+        </DialogContent>
+      </Dialog>
         </Toolbar>
       </AppBar>
 

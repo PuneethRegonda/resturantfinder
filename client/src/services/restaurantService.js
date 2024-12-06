@@ -87,9 +87,10 @@ export const checkPincodeValidity = async (pincode) => {
   }
 };
 
+
 export const getRestaurantDetails = async (id) => {
   try {
-    const response = await fetch(`/api/restaurants/${id}?sortBy=recent`);
+    const response = await fetchWithRequestId(`/api/restaurants/${id}?sortBy=recent`);
     if (response.ok) {
       const data = await response.json();
       if (data.status === 'success' && data.data) {

@@ -1,28 +1,24 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/User/Home';  // Corrected import path
-import RestaurantPage from './pages/User/Restaurant'; 
+import Home from './pages/User/Home';
+import RestaurantPage from './pages/User/Restaurant';
 import './App.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import BusinessHome from './pages/Business/Business_home';
 import RestaurantListPage from './pages/Business/View';
 import EditRestaurant from './pages/Business/Edit';
-
+import AdminDuplicateRestaurants from './pages/Admin/AdminDuplicateRestaurants'
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Home Page Route */}
         <Route path="/" element={<Home />} />
-
-        {/* Restaurant Detail Page Route */}
         <Route path="/restaurant/:id/:name" element={<RestaurantPage />} />
-
-
         <Route path="/business" element={<BusinessHome />} />
         <Route path="/views" element={<RestaurantListPage />} />
         <Route path="/edit" element={<EditRestaurant />} />
+        <Route path="/admin/duplicate-restaurants" element={<AdminDuplicateRestaurants />} />
       </Routes>
     </Router>
   );
