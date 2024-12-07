@@ -1,5 +1,6 @@
 package com.opensource.resturantfinder.model;
 
+import java.util.Collections;
 import java.util.List;
 
 public class RestaurantDTO {
@@ -9,18 +10,26 @@ public class RestaurantDTO {
     private Double latitude;
     private Double longitude;
     private String iconUrl;
-    private PriceRange priceLevel;
+    private Integer priceLevel;
     private Double rating;
     private Integer userRatingsTotal;
     private String vicinity;
     private RestaurantDetailsDTO details;
     private List<OperatingHoursDTO> operatingHours;
     private List<CategoryDTO> categories;
+    private String place_id;
 
-    // Getters and setters
+    public String getPlace_id() {
+        return place_id == null ? "" : place_id;
+    }
 
+    public void setPlace_id(String place_id) {
+        this.place_id = place_id;
+    }
+
+    // Getters and setters with null safety
     public Long getId() {
-        return id;
+        return id == null ? 0L : id;
     }
 
     public void setId(Long id) {
@@ -28,7 +37,7 @@ public class RestaurantDTO {
     }
 
     public String getName() {
-        return name;
+        return name == null ? "" : name;
     }
 
     public void setName(String name) {
@@ -36,7 +45,7 @@ public class RestaurantDTO {
     }
 
     public String getBusinessStatus() {
-        return businessStatus;
+        return businessStatus == null ? "" : businessStatus;
     }
 
     public void setBusinessStatus(String businessStatus) {
@@ -44,7 +53,7 @@ public class RestaurantDTO {
     }
 
     public Double getLatitude() {
-        return latitude;
+        return latitude == null ? 0.0 : latitude;
     }
 
     public void setLatitude(Double latitude) {
@@ -52,7 +61,7 @@ public class RestaurantDTO {
     }
 
     public Double getLongitude() {
-        return longitude;
+        return longitude == null ? 0.0 : longitude;
     }
 
     public void setLongitude(Double longitude) {
@@ -60,23 +69,23 @@ public class RestaurantDTO {
     }
 
     public String getIconUrl() {
-        return iconUrl;
+        return iconUrl == null ? "" : iconUrl;
     }
 
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
     }
 
-    public PriceRange getPriceLevel() {
-        return priceLevel;
+    public Integer getPriceLevel() {
+        return priceLevel == null ? 0 : priceLevel;
     }
 
-    public void setPriceLevel(PriceRange priceLevel) {
+    public void setPriceLevel(Integer priceLevel) {
         this.priceLevel = priceLevel;
     }
 
     public Double getRating() {
-        return rating;
+        return rating == null ? 0.0 : rating;
     }
 
     public void setRating(Double rating) {
@@ -84,7 +93,7 @@ public class RestaurantDTO {
     }
 
     public Integer getUserRatingsTotal() {
-        return userRatingsTotal;
+        return userRatingsTotal == null ? 0 : userRatingsTotal;
     }
 
     public void setUserRatingsTotal(Integer userRatingsTotal) {
@@ -92,7 +101,7 @@ public class RestaurantDTO {
     }
 
     public String getVicinity() {
-        return vicinity;
+        return vicinity == null ? "" : vicinity;
     }
 
     public void setVicinity(String vicinity) {
@@ -100,7 +109,7 @@ public class RestaurantDTO {
     }
 
     public RestaurantDetailsDTO getDetails() {
-        return details;
+        return details == null ? new RestaurantDetailsDTO() : details;
     }
 
     public void setDetails(RestaurantDetailsDTO details) {
@@ -108,7 +117,7 @@ public class RestaurantDTO {
     }
 
     public List<OperatingHoursDTO> getOperatingHours() {
-        return operatingHours;
+        return operatingHours == null ? Collections.emptyList() : operatingHours;
     }
 
     public void setOperatingHours(List<OperatingHoursDTO> operatingHours) {
@@ -116,7 +125,7 @@ public class RestaurantDTO {
     }
 
     public List<CategoryDTO> getCategories() {
-        return categories;
+        return categories == null ? Collections.emptyList() : categories;
     }
 
     public void setCategories(List<CategoryDTO> categories) {
@@ -126,19 +135,20 @@ public class RestaurantDTO {
     @Override
     public String toString() {
         return "RestaurantDTO{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", businessStatus='" + businessStatus + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                ", iconUrl='" + iconUrl + '\'' +
-                ", priceLevel=" + priceLevel +
-                ", rating=" + rating +
-                ", userRatingsTotal=" + userRatingsTotal +
-                ", vicinity='" + vicinity + '\'' +
-                ", details=" + details +
-                ", operatingHours=" + operatingHours +
-                ", categories=" + categories +
+                "id=" + getId() +
+                ", name='" + getName() + '\'' +
+                ", businessStatus='" + getBusinessStatus() + '\'' +
+                ", latitude=" + getLatitude() +
+                ", longitude=" + getLongitude() +
+                ", iconUrl='" + getIconUrl() + '\'' +
+                ", priceLevel=" + getPriceLevel() +
+                ", rating=" + getRating() +
+                ", userRatingsTotal=" + getUserRatingsTotal() +
+                ", vicinity='" + getVicinity() + '\'' +
+                ", details=" + getDetails() +
+                ", operatingHours=" + getOperatingHours() +
+                ", categories=" + getCategories() +
+                ", place_id='" + getPlace_id() + '\'' +
                 '}';
     }
 }

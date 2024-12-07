@@ -1,8 +1,6 @@
 package com.opensource.resturantfinder.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.opensource.resturantfinder.converter.PriceRangeConverter;
-import com.opensource.resturantfinder.model.PriceRange;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -20,6 +18,7 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     @Column(nullable = false)
     private String name;
 
@@ -28,14 +27,16 @@ public class Restaurant {
     private Double longitude;
     private String iconUrl;
 
+    private String zipcode;
+
+
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
 
-    @Convert(converter = PriceRangeConverter.class)
     @Column(name = "price_level")
-    private PriceRange priceLevel;
+    private Integer priceLevel;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
@@ -63,6 +64,14 @@ public class Restaurant {
     )
     @JsonManagedReference
     private Set<Category> categories = new HashSet<>();
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
 
     public Long getId() {
         return id;
@@ -112,11 +121,11 @@ public class Restaurant {
         this.iconUrl = iconUrl;
     }
 
-    public PriceRange getPriceLevel() {
+    public Integer getPriceLevel() {
         return priceLevel;
     }
 
-    public void setPriceLevel(PriceRange priceLevel) {
+    public void setPriceLevel(Integer priceLevel) {
         this.priceLevel = priceLevel;
     }
 

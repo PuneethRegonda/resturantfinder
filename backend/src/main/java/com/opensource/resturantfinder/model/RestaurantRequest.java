@@ -3,6 +3,7 @@ package com.opensource.resturantfinder.model;
 import java.util.List;
 
 public class RestaurantRequest {
+    private String owner;
     private String name;
     private String businessStatus;
     private Double latitude;
@@ -20,10 +21,40 @@ public class RestaurantRequest {
     private Boolean isVegan;
     private List<String> categories;
     private List<OperatingHoursRequest> operatingHours;
+    private String zipcode;
 
+    public Boolean getVegetarian() {
+        return isVegetarian;
+    }
+
+    public void setVegetarian(Boolean vegetarian) {
+        isVegetarian = vegetarian;
+    }
+
+    public Boolean getVegan() {
+        return isVegan;
+    }
+
+    public void setVegan(Boolean vegan) {
+        isVegan = vegan;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
     // Getters and setters
 
+    public String getOwner() {
+        return owner;
+    }
 
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
     public String getName() {
         return name;
     }
@@ -77,7 +108,7 @@ public class RestaurantRequest {
     }
 
     public void setRating(Double rating) {
-        this.rating = rating;
+        this.rating = rating != null ? rating : null;
     }
 
     public Integer getUserRatingsTotal() {
@@ -85,7 +116,7 @@ public class RestaurantRequest {
     }
 
     public void setUserRatingsTotal(Integer userRatingsTotal) {
-        this.userRatingsTotal = userRatingsTotal;
+        this.userRatingsTotal = userRatingsTotal != null ? userRatingsTotal : null;
     }
 
     public String getVicinity() {

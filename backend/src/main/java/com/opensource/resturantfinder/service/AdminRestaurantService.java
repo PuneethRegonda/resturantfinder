@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,4 +47,15 @@ public class AdminRestaurantService {
                         }
                 );
     }
+
+    public void removeRestaurants(List<Long> restaurantIds) {
+        for (Long restaurantId : restaurantIds) {
+            if (restaurantRepository.existsById(restaurantId)) {
+                restaurantRepository.deleteById(restaurantId);
+            } else {
+                throw new ResourceNotFoundException("Restaurant not found with ID: " + restaurantId);
+            }
+        }
+    }
+
 }
