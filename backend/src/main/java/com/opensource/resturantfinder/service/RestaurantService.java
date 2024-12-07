@@ -6,12 +6,14 @@ import com.opensource.resturantfinder.model.*;
 import com.opensource.resturantfinder.repository.CategoryRepository;
 import com.opensource.resturantfinder.repository.RestaurantRepository;
 import com.opensource.resturantfinder.repository.ReviewRepository;
+import com.opensource.resturantfinder.repository.UserRepository;
+import com.opensource.resturantfinder.security.JwtUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,24 +23,23 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
     private final ReviewRepository reviewRepository;
+    private final JwtUtil jwtUtil; // Utility class to handle token parsing
+    private final UserRepository userRepository;
 
     @Autowired
-    public RestaurantService(RestaurantRepository restaurantRepository, CategoryRepository categoryRepository,ReviewRepository reviewRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, CategoryRepository categoryRepository, ReviewRepository reviewRepository, JwtUtil jwtUtil, UserRepository userRepository) {
         this.restaurantRepository = restaurantRepository;
         this.categoryRepository = categoryRepository;
         this.reviewRepository = reviewRepository;
-
+        this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
+    public Restaurant addRestaurant(RestaurantRequest request, String email) {
+        // Fetch the owner by email
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Owner not found with email: " + email));
 
-    @Transactional
-    public Restaurant addRestaurant(RestaurantRequest request) {
-          // Extract the email from the token
-    String email = jwtUtil.extractUsername(authToken.substring(7)); // Assuming "Bearer " prefix
-
-    // Fetch the user by email
-    User owner = userService.findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        // Create a new Restaurant object
+        // Create and populate the Restaurant entity
         Restaurant restaurant = new Restaurant();
         restaurant.setName(request.getName());
         restaurant.setBusinessStatus(request.getBusinessStatus());
@@ -49,8 +50,9 @@ public class RestaurantService {
         restaurant.setRating(request.getRating());
         restaurant.setUserRatingsTotal(request.getUserRatingsTotal());
         restaurant.setVicinity(request.getVicinity());
-        restaurant.setOwner(request.getOwner());
-        // Map details
+        restaurant.setOwner(owner);
+        restaurant.setZipcode(request.getZipcode());
+        // Populate RestaurantDetails
         RestaurantDetails details = new RestaurantDetails();
         details.setDescription(request.getDescription());
         details.setPhoneNumber(request.getPhoneNumber());
@@ -58,36 +60,79 @@ public class RestaurantService {
         details.setCuisineType(request.getCuisineType());
         details.setIsVegetarian(request.getIsVegetarian());
         details.setIsVegan(request.getIsVegan());
-        details.setRestaurant(restaurant); // Link details back to the restaurant
-    
-        // Map categories
-        Set<Category> categories = request.getCategories().stream()
-                .map(name -> categoryRepository.findByName(name)
-                        .orElseGet(() -> categoryRepository.save(new Category(name))))
-                .collect(Collectors.toSet());
-        restaurant.setCategories(categories);
-    
-        // Map operating hours
-        List<OperatingHours> operatingHours = request.getOperatingHours().stream()
-        .map(req -> {
-            OperatingHours hours = new OperatingHours();
-            hours.setDayOfWeek(req.getDayOfWeek());
-            hours.setOpenTime(req.getOpenTime());
-            hours.setCloseTime(req.getCloseTime());
-            return hours;
-        })
-        .collect(Collectors.toList());
-restaurant.setOperatingHours(operatingHours);
-
-    
-        // Set details
         restaurant.setDetails(details);
-    
-        // Save the restaurant
+        details.setRestaurant(restaurant);
+
+        // Handle categories: Reuse or create new
+        for (String categoryName : request.getCategories()) {
+            Category category = categoryRepository.findByName(categoryName)
+                    .orElseGet(() -> {
+                        Category newCategory = new Category();
+                        newCategory.setName(categoryName);
+                        return categoryRepository.save(newCategory);
+                    });
+            restaurant.getCategories().add(category);
+        }
+
+        // Handle operating hours
+        for (OperatingHoursRequest hourRequest : request.getOperatingHours()) {
+            OperatingHours hours = new OperatingHours();
+            hours.setDayOfWeek(hourRequest.getDayOfWeek());
+            hours.setOpenTime(hourRequest.getOpenTime());
+            hours.setCloseTime(hourRequest.getCloseTime());
+            hours.setRestaurant(restaurant);
+            restaurant.getOperatingHours().add(hours);
+        }
+
+        // Save and return the restaurant
         return restaurantRepository.save(restaurant);
     }
-    
 
+//
+//    public Restaurant addRestaurant(RestaurantRequest request,String email) {
+//
+//        User owner = userRepository.findByEmail(email)
+//                .orElseThrow(() -> new ResourceNotFoundException("Owner not found with email: " + email));
+//
+//        Restaurant restaurant = new Restaurant();
+//        restaurant.setOwner(owner);
+//
+//        restaurant.setName(request.getName());
+//        restaurant.setBusinessStatus(request.getBusinessStatus());
+//        restaurant.setLatitude(request.getLatitude());
+//        restaurant.setLongitude(request.getLongitude());
+//        restaurant.setIconUrl(request.getIconUrl());
+//        restaurant.setPriceLevel(request.getPriceLevel());
+//        restaurant.setRating(request.getRating());
+//        restaurant.setUserRatingsTotal(request.getUserRatingsTotal());
+//        restaurant.setVicinity(request.getVicinity());
+//
+//        RestaurantDetails details = new RestaurantDetails();
+//
+//        details.setDescription(request.getDescription());
+//        details.setPhoneNumber(request.getPhoneNumber());
+//        details.setWebsite(request.getWebsite());
+//        details.setCuisineType(request.getCuisineType());
+//        details.setIsVegetarian(request.getIsVegetarian());
+//        details.setIsVegan(request.getIsVegan());
+//
+//        for (String categoryName : request.getCategories()) {
+//            Category category = categoryRepository.findByName(categoryName)
+//                    .orElseGet(() -> categoryRepository.save(new Category(categoryName)));
+//            restaurant.getCategories().add(category);
+//        }
+//
+//        for (OperatingHoursRequest hourRequest : request.getOperatingHours()) {
+//            OperatingHours hours = new OperatingHours();
+//            hours.setDayOfWeek(hourRequest.getDayOfWeek());
+//            hours.setOpenTime(hourRequest.getOpenTime());
+//            hours.setCloseTime(hourRequest.getCloseTime());
+//            restaurant.getOperatingHours().add(hours);
+//        }
+//        restaurant.setDetails(details);
+//        details.setRestaurant(restaurant);
+//        return restaurantRepository.save(restaurant);
+//    }
 
     public RestaurantDetailsResponse getRestaurantDetails(Long restaurantId, String sortBy) {
         // Fetch restaurant details

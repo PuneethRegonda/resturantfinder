@@ -21,7 +21,31 @@ public class RestaurantRequest {
     private Boolean isVegan;
     private List<String> categories;
     private List<OperatingHoursRequest> operatingHours;
+    private String zipcode;
 
+    public Boolean getVegetarian() {
+        return isVegetarian;
+    }
+
+    public void setVegetarian(Boolean vegetarian) {
+        isVegetarian = vegetarian;
+    }
+
+    public Boolean getVegan() {
+        return isVegan;
+    }
+
+    public void setVegan(Boolean vegan) {
+        isVegan = vegan;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
     // Getters and setters
 
     public String getOwner() {

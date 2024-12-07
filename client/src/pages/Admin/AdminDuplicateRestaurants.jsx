@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { Box, Typography, Checkbox, Button } from '@mui/material';
+import { Box, Typography, Button, Checkbox, Grid } from '@mui/material';
 import PaginatedList from '../../components/PaginatedList';
 import RestaurantCard from '../../components/RestaurantCard';
-import { fetchDuplicateRestaurants, deleteDuplicateRestaurants } from '../../services/adminService';
+import { fetchDuplicateRestaurants, deleteMultipleRestaurants } from '../../services/adminService';
 
 const AdminDuplicateRestaurants = () => {
-  const [selectedRestaurants, setSelectedRestaurants] = useState([]);
+  const [selectedRestaurants, setSelectedRestaurants] = useState([]); // Track selected restaurants
 
-  const handleSearch = (triggeredBy, payload, isValid) => {
-    // Implement if needed
-  };
-
+  /**
+   * Fetch duplicate restaurants from the backend
+   * @param {number} page - Current page number
+   * @param {number} pageSize - Number of restaurants per page
+   * @returns {Promise<{ data: Object[], totalPages: number }>} - Paginated list of restaurants
+   */
   const fetchRestaurants = async (page, pageSize) => {
     try {
       const response = await fetchDuplicateRestaurants(page - 1, pageSize);
@@ -24,51 +26,64 @@ const AdminDuplicateRestaurants = () => {
     }
   };
 
-  const handleCheckboxChange = (restaurantId) => {
-    setSelectedRestaurants(prev => 
-      prev.includes(restaurantId) 
-        ? prev.filter(id => id !== restaurantId)
-        : [...prev, restaurantId]
-    );
-  };
-
+  /**
+   * Handle the batch deletion of selected restaurants
+   */
   const handleDeleteSelected = async () => {
+    if (!window.confirm('Are you sure you want to delete the selected restaurants?')) {
+      return;
+    }
+
     try {
-      await deleteDuplicateRestaurants(selectedRestaurants);
-      setSelectedRestaurants([]);
-      // Refresh the list
+      await deleteMultipleRestaurants(selectedRestaurants);
+      alert('Selected restaurants deleted successfully.');
+      setSelectedRestaurants([]); // Clear selection after deletion
     } catch (error) {
-      console.error('Error deleting restaurants:', error);
+      alert(`Failed to delete restaurants: ${error.message}`);
     }
   };
 
+  /**
+   * Render individual restaurant items
+   * @param {Object} restaurant - Restaurant data
+   * @returns {JSX.Element} - Rendered restaurant item
+   */
   const renderRestaurantItem = (restaurant) => (
-    <Box display="flex" alignItems="center">
-      <Checkbox
-        checked={selectedRestaurants.includes(restaurant.id)}
-        onChange={() => handleCheckboxChange(restaurant.id)}
-      />
-      <RestaurantCard restaurant={restaurant} />
-    </Box>
+    <Grid container alignItems="center" key={restaurant.restaurantId} sx={{ marginBottom: '20px' }}>
+      <Grid item xs={1}>
+        <Checkbox
+          checked={selectedRestaurants.includes(restaurant.restaurantId)}
+          onChange={(e) => {
+            const { checked } = e.target;
+            setSelectedRestaurants((prev) =>
+              checked
+                ? [...prev, restaurant.restaurantId] // Add to selection
+                : prev.filter((id) => id !== restaurant.restaurantId) // Remove from selection
+            );
+          }}
+        />
+      </Grid>
+      <Grid item xs={9}>
+        <RestaurantCard restaurant={restaurant} />
+      </Grid>
+    </Grid>
   );
 
   return (
     <Box sx={{ padding: '20px' }}>
-      <Typography variant="h4" sx={{ marginBottom: '20px' }}>Duplicate Restaurants</Typography>
-      <Button 
-        variant="contained" 
-        color="secondary" 
+      <Typography variant="h4" sx={{ marginBottom: '20px' }}>
+        Duplicate Restaurants
+      </Typography>
+      <Button
+        variant="contained"
+        color="secondary"
         onClick={handleDeleteSelected}
         disabled={selectedRestaurants.length === 0}
         sx={{ marginBottom: '20px' }}
       >
         Delete Selected
       </Button>
-      <PaginatedList
-        fetchData={fetchRestaurants}
-        renderItem={renderRestaurantItem}
-        pageSize={10}
-      />
+      <PaginatedList fetchData={fetchRestaurants} renderItem={renderRestaurantItem} pageSize={10} />
     </Box>
   );
 };

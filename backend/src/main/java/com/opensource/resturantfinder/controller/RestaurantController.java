@@ -4,6 +4,7 @@ import com.opensource.resturantfinder.common.ApiResponse;
 import com.opensource.resturantfinder.entity.Restaurant;
 import com.opensource.resturantfinder.model.RestaurantDetailsResponse;
 import com.opensource.resturantfinder.model.RestaurantRequest;
+import com.opensource.resturantfinder.security.JwtUtil;
 import com.opensource.resturantfinder.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,10 +20,13 @@ import org.springframework.web.bind.annotation.*;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public RestaurantController(RestaurantService restaurantService) {
+    public RestaurantController(RestaurantService restaurantService, JwtUtil jwtUtil) {
         this.restaurantService = restaurantService;
+        this.jwtUtil = jwtUtil;
+
     }
 
     @PostMapping
@@ -31,8 +35,12 @@ public class RestaurantController {
             @Parameter(description = "Restaurant details", required = true)
             @Valid @RequestBody RestaurantRequest restaurantRequest,
             @Parameter(description = "Unique request identifier", required = true)
-            @RequestHeader("X-Request-ID") String requestId) {
-        Restaurant savedRestaurant = restaurantService.addRestaurant(restaurantRequest);
+            @RequestHeader("X-Request-ID") String requestId,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        String token = authorizationHeader.replace("Bearer ", "");
+        String email = jwtUtil.extractUsername(token);
+        Restaurant savedRestaurant = restaurantService.addRestaurant(restaurantRequest,email);
         return ResponseEntity.ok(ApiResponse.success(savedRestaurant, requestId));
     }
 

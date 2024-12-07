@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/restaurants")
 @Tag(name = "Admin Restaurants", description = "Admin operations for managing restaurants")
@@ -27,13 +29,13 @@ public class AdminRestaurantController {
         PagedResponse<DuplicateFlagResponse> duplicates = adminRestaurantService.detectDuplicates(page, size);
         return ResponseEntity.ok(ApiResponse.success(duplicates, requestId));
     }
-
-    @DeleteMapping("/{restaurantId}")
-    @Operation(summary = "Remove Restaurant", description = "Remove flagged or inactive restaurants")
-    public ResponseEntity<ApiResponse<Void>> removeRestaurant(
-            @PathVariable Long restaurantId,
+    @PostMapping("/delete")
+    @Operation(summary = "Delete Multiple Restaurants", description = "Delete multiple restaurants by their IDs")
+    public ResponseEntity<ApiResponse<Void>> deleteMultipleRestaurants(
+            @RequestBody List<Long> restaurantIds,
             @RequestHeader("X-Request-ID") String requestId) {
-        adminRestaurantService.removeRestaurant(restaurantId);
+        adminRestaurantService.removeRestaurants(restaurantIds);
         return ResponseEntity.ok(ApiResponse.success(null, requestId));
     }
+
 }
