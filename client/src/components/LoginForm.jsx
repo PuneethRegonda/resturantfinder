@@ -11,9 +11,12 @@ const LoginForm = ({ onClose, onLoginSuccess }) => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetchWithRequestId(API_ENDPOINTS.AUTH.LOGIN, {
+      const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' ,
+          'X-Request-ID': crypto.randomUUID(),
+
+        },
         body: JSON.stringify({ email, password }),
       });
 

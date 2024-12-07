@@ -53,7 +53,7 @@ const SearchBar = ({ onSearch }) => {
       <TextField
         fullWidth
         variant="outlined"
-        placeholder="Restaurants, cuisine, or address"
+        placeholder="Restaurants Name or Zip Code"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         InputProps={{

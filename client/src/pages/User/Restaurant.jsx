@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { getRestaurantDetails } from '../../services/restaurantService';
+import { fetchWithRequestId } from '../../utils/api';
 
 const RestaurantPage = () => {
   const { id } = useParams();
@@ -63,15 +64,45 @@ const RestaurantPage = () => {
 
   const handleSubmitReview = () => {
     if (newReview.rating > 0 && newReview.text.trim()) {
-      setReviews((prev) => [
-        ...prev,
-        { userName: 'You', rating: newReview.rating, reviewText: newReview.text },
-      ]);
-      handleCloseReviewDialog();
+      const reviewData = {
+        restaurantId: id, // Use the current restaurant's ID from useParams
+        rating: newReview.rating,
+        reviewText: newReview.text.trim(),
+      };
+  
+      // Make the API call
+      fetchWithRequestId('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'     
+        },
+        body: JSON.stringify(reviewData),
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json(); // Parse JSON response
+          } else {
+            throw new Error('Failed to submit the review');
+          }
+        })
+        .then((data) => {
+          // Update the reviews list in the UI
+          setReviews((prev) => [
+            ...prev,
+            { userName: 'You', rating: newReview.rating, reviewText: newReview.text },
+          ]);
+          alert('Review submitted successfully!');
+          handleCloseReviewDialog(); // Close the dialog
+        })
+        .catch((error) => {
+          console.error('Error submitting review:', error);
+          alert('Error submitting review. Please try again.');
+        });
     } else {
       alert('Please provide a rating and review text!');
     }
   };
+  
 
   if (!restaurant) {
     return <Typography variant="h6">Invalid restaurant data.</Typography>;

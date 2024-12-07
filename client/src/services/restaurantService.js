@@ -1,5 +1,5 @@
 // Function to search restaurants by query using your Spring Boot backend
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = '';
 
 import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
 

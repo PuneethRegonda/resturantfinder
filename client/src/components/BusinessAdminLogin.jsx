@@ -6,30 +6,31 @@ import LoginForm from './LoginForm'; // Adjust import path as needed
 const BusinessAdminLogin = () => {
   const [open, setOpen] = useState(true); // Control dialog visibility
   const [error, setError] = useState(''); // Error handling for login failures
+  const [role, setRole] = useState(null); // Store role for navigation
   const navigate = useNavigate(); // Navigation hook
 
-  // Clear local storage on component mount
-  useEffect(() => {
-    console.log('Clearing local storage...');
-    localStorage.clear();
-  }, []);
-
   // Callback for successful login
-  const handleLoginSuccess = (token, role) => {
-    if (role === 'ADMIN') {
-      localStorage.setItem('authToken', token); // Save token to localStorage
-      alert('Admin login successful!'); // Show success alert
+  const handleLoginSuccess = (role) => {
+    console.log('Login successful:', role); // Debug log
+    if (role.includes('ADMIN') || role.includes('BUSINESS')) {
+      // alert('Login successful'); // Show success alert
+      setRole(role); // Save the role for navigation
       setOpen(false); // Close the dialog
-      navigate('/admin/duplicate-restaurants'); // Redirect to AdminDuplicateRestaurants
-    } else if (role === 'BUSINESS') {
-      localStorage.setItem('authToken', token); // Save token to localStorage
-      alert('Business owner login successful!'); // Show success alert
-      setOpen(false); // Close the dialog
-      navigate('/views'); // Redirect to RestaurantListPage
     } else {
       setError('Invalid role for Business/Admin login');
     }
   };
+
+  // Navigate based on role after dialog closes
+  useEffect(() => {
+    if (!open && role) {
+      if (role.includes('ADMIN')) {
+        navigate('/admin/duplicate-restaurants'); // Navigate to admin page
+      } else if (role.includes('BUSINESS')) {
+        navigate('/views'); // Navigate to business owner page
+      }
+    }
+  }, [open, role, navigate]);
 
   // Handle dialog close
   const handleClose = () => {
@@ -45,9 +46,6 @@ const BusinessAdminLogin = () => {
           '& .MuiDialog-paper': {
             borderRadius: '16px', // Rounded corners
           },
-        }}
-        TransitionProps={{
-          onExited: () => console.log('Dialog closed'), // Optional exit handler
         }}
       >
         <DialogTitle>Business/Admin Login</DialogTitle>

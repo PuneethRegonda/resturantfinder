@@ -3,10 +3,13 @@ import { Box, Typography, Button, Checkbox, Grid } from '@mui/material';
 import PaginatedList from '../../components/PaginatedList';
 import RestaurantCard from '../../components/RestaurantCard';
 import { fetchDuplicateRestaurants, deleteMultipleRestaurants } from '../../services/adminService';
+import AdminHeader from '../../components/AdminHeader'; // Import the AdminHeader component
+import Footer from '../../components/Footer'; // Import Footer
+import { useNavigate } from 'react-router-dom'; // Ensure useNavigate is imported
 
 const AdminDuplicateRestaurants = () => {
   const [selectedRestaurants, setSelectedRestaurants] = useState([]); // Track selected restaurants
-
+  const navigate = useNavigate(); 
   /**
    * Fetch duplicate restaurants from the backend
    * @param {number} page - Current page number
@@ -24,6 +27,12 @@ const AdminDuplicateRestaurants = () => {
       console.error('Error fetching duplicate restaurants:', error);
       throw error;
     }
+  };
+  const handleLogout = () => {
+    console.log('Logging out'); // Debug log
+    localStorage.removeItem('authToken'); // Clear token on logout
+    localStorage.removeItem('userRoles'); // Clear roles on logout
+    navigate('/'); // Redirect to the home page
   };
 
   /**
@@ -69,22 +78,27 @@ const AdminDuplicateRestaurants = () => {
     </Grid>
   );
 
+
   return (
-    <Box sx={{ padding: '20px' }}>
-      <Typography variant="h4" sx={{ marginBottom: '20px' }}>
-        Duplicate Restaurants
-      </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={handleDeleteSelected}
-        disabled={selectedRestaurants.length === 0}
-        sx={{ marginBottom: '20px' }}
-      >
-        Delete Selected
-      </Button>
-      <PaginatedList fetchData={fetchRestaurants} renderItem={renderRestaurantItem} pageSize={10} />
-    </Box>
+    <>
+      <AdminHeader buttonText="Add Admin Task" onLogout={handleLogout} />
+      <Box sx={{ padding: '20px' }}>
+        <Typography variant="h4" sx={{ marginBottom: '20px' }}>
+          Duplicate Restaurants
+        </Typography>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleDeleteSelected}
+          disabled={selectedRestaurants.length === 0}
+          sx={{ marginBottom: '20px' }}
+        >
+          Delete Selected
+        </Button>
+        <PaginatedList fetchData={fetchRestaurants} renderItem={renderRestaurantItem} pageSize={10} />
+      </Box>
+      <Footer />
+    </>
   );
 };
 
