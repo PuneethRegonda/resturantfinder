@@ -1,50 +1,41 @@
 // Function to search restaurants by query using your Spring Boot backend
 const BASE_URL = 'http://localhost:5000';
-
-export const searchRestaurants = async (query, lat, lng) => {
+export const getPincodeFromServer = async (lat, lng) => {
   try {
-    // Destructure filters
-    // const { cuisineType, foodType, priceLevel, minRating } = filters;
-
-    // Construct query parameters
-    const queryParams = new URLSearchParams();
-    if (query) queryParams.append('query', query);
-    // if (cuisineType) queryParams.append('cuisineType', cuisineType);
-    // if (foodType) queryParams.append('foodType', foodType);
-    // if (priceLevel) queryParams.append('priceLevel', priceLevel);
-    // if (minRating) queryParams.append('minRating', minRating);
-
-    const response = await fetch(`${BASE_URL}/api/search-restaurants?${queryParams.toString()}`, {
+    const response = await fetch(`${BASE_URL}/getPincode?lat=${lat}&lng=${lng}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
     if (response.ok) {
-      const data = await response.json();
-      return data.results; // Assuming the API returns an array of restaurant objects
+      const pincode = await response.text(); // Get the pincode as plain text
+      return pincode;
     } else {
-      console.error(`Error from backend search API (${response.status}): ${response.statusText}`);
-      return [];
+      console.error(`Error from backend API (${response.status}): ${response.statusText}`);
+      return null;
     }
   } catch (error) {
-    console.error('Error during restaurant search:', error);
-    return [];
+    console.error('Error fetching pincode from backend:', error);
+    return null;
   }
 };
 
-// Function to get nearby restaurants using the Spring Boot backend
-export const getNearbyRestaurants = async (lat, lng) => {
-  if (!lat || !lng) {
-    console.error("Latitude and Longitude must be provided.");
+// Function to search restaurants using a query
+export const searchRestaurants = async (query) => {
+  if (!query) {
+    console.error("Query must be provided.");
     return [];
   }
 
   try {
-    // Constructing the URL to call the backend with latitude and longitude
-    const url = `${BASE_URL}/api/nearby-restaurants?location=${lat},${lng}`;
+    // Construct query parameters
+    const queryParams = new URLSearchParams();
+    queryParams.append('query', query); // Add query to the parameters
 
-    const response = await fetch(url, {
+    // Hit the unified API
+    const response = await fetch(`${BASE_URL}/getRestaurants?${queryParams.toString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -53,7 +44,42 @@ export const getNearbyRestaurants = async (lat, lng) => {
 
     if (response.ok) {
       const data = await response.json();
-      return data.results || [];
+      return data.results || []; // Assuming the API returns results in `data.results`
+    } else {
+      console.error(`Error from backend API (${response.status}): ${response.statusText}`);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error during restaurant search:', error);
+    return [];
+  }
+};
+
+// Function to get nearby restaurants using location
+export const getNearbyRestaurants = async (lat, lng) => {
+  if (!lat || !lng) {
+    console.error("Latitude and Longitude must be provided.");
+    return [];
+  }
+
+  try {
+    // Construct location parameter as a string in the format lat,lng
+    const location = `${lat},${lng}`;
+
+    // Construct the query parameters manually
+    const queryParams = `location=${location}`;
+
+    // Hit the unified API
+    const response = await fetch(`${BASE_URL}/getRestaurants?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.results || []; // Assuming the API returns results in `data.results`
     } else {
       console.error(`Error from backend API (${response.status}): ${response.statusText}`);
       return [];
@@ -64,10 +90,12 @@ export const getNearbyRestaurants = async (lat, lng) => {
   }
 };
 
+
+
 export const checkPincodeValidity = async (pincode) => {
   try {
     // Replace with your actual Google Maps API key
-    const apiKey = 'AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU';
+    const apiKey = 'AIzaSyCX5XGEKQe3G4M0R84r7sZkeTwXlCMtTuU';
 
     // Make the API call using fetch
     const response = await fetch(
@@ -112,7 +140,7 @@ export const getRestaurantDetails = async (name) => {
 
 export const getPhotoUrl = (placeID) => {
   if (photoDetails) {
-  const apiKey = 'AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU'; 
+  const apiKey = 'AIzaSyCX5XGEKQe3G4M0R84r7sZkeTwXlCMtTuU'; 
   const googlePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&placeid=${placID}&key=${apiKey}`;
   return googlePhotoUrl;
   }else {
