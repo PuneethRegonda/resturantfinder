@@ -94,7 +94,7 @@ const RestaurantListPage = () => {
                     component="img"
                     height="200"
                     image={
-                      "https://via.placeholder.com/300" // Placeholder image for restaurants
+                      restaurant.iconUrl
                     }
                     alt={restaurant.name}
                     sx={{

@@ -10,7 +10,7 @@ const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked 
     if (restaurant.id) {
       getPlacePhotos(restaurant.id, 200)
         .then((urls) => setPhotoUrls(urls))
-        .catch(() => setPhotoUrls(['https://via.placeholder.com/400']));
+        .catch(() => setPhotoUrls([restaurant.iconUrl]));
     }
   }, [restaurant.id]);
 
@@ -59,8 +59,8 @@ const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked 
             src={photoUrls[currentImageIndex]}
             alt={`Restaurant ${currentImageIndex + 1}`}
             style={{
-              width: '100%',
-              height: '100%',
+              width: '250px',
+              height: '200px',
               objectFit: 'cover',
             }}
           />
