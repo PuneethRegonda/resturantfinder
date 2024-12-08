@@ -103,7 +103,7 @@ export const getNearbyRestaurants = async (lat, lng) => {
 
   try {
     // Constructing the URL to call the backend with latitude and longitude
-    const url = `${BASE_URL}/api/nearby-restaurants?location=${lat},${lng}`;
+    const url = await fetchWithRequestId(`/api/restaurants/google?location=${lat},${lng}`);
 
     const response = await fetch(url, {
       method: 'GET',

@@ -38,9 +38,9 @@ const MapContainer = ({ zipCode }) => {
   };
 
   const fetchLocationForZip = async (zip) => {
-    if (!zip) return;
     setLoading(true);
     try {
+      if (!zip) zip = '95126';
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=AIzaSyD3fqwSWp1IuXJesIHBUf1GEhWRVT_LJP4`
       );
@@ -48,7 +48,11 @@ const MapContainer = ({ zipCode }) => {
       if (response.ok && data.status === 'OK' && data.results.length > 0) {
         const location = data.results[0].geometry.location;
         setUserLocation({ lat: location.lat, lng: location.lng });
-        fetchRestaurants(location.lat, location.lng);
+
+        // Only fetch restaurants if the map has loaded
+        if (mapRef.current) {
+          fetchRestaurants(location.lat, location.lng);
+        }
       } else {
         setError('Invalid ZIP code. Please try again.');
       }
@@ -70,7 +74,11 @@ const MapContainer = ({ zipCode }) => {
         mapContainerStyle={containerStyle}
         center={userLocation}
         zoom={12}
-        onLoad={(map) => (mapRef.current = map)} // Reference the map object
+        onLoad={(map) => {
+          mapRef.current = map;
+          // Fetch restaurants if userLocation is already set
+          fetchRestaurants(userLocation.lat, userLocation.lng);
+        }} // Reference the map object
         options={{ disableDefaultUI: true, zoomControl: true }}
       >
         {loading && <div>Loading...</div>}

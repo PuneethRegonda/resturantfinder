@@ -19,8 +19,11 @@ const Home = () => {
       setSearchPayload(payload); // Update search filters
     }
   };
-  const fetchGoogleRestaurants = async () => {
-    const location = await getLocation(searchPayload.name) ||  { lat: 37.3304795, lng: -121.905282 }; // Example location
+  const fetchGoogleRestaurants = async (searchPayload) => {
+    let location={  lat: 37.3304795, lng: -121.905282 }
+    if(searchPayload.name!=undefined){
+       location = await getLocation(searchPayload.name) ||  { lat: 37.3304795, lng: -121.905282 }; // Example location
+    }
   
     try {
       const restaurants = await searchGoogleRestaurants(location);
@@ -130,7 +133,7 @@ const Home = () => {
             borderRadius: '8px',
           }}
         >
-          <MapContainer zipCode={searchPayload.name} />
+          <MapContainer zipCode={searchPayload.name || '95126'} />
         </Box>
       </Box>
 
