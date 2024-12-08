@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getPlacePhotos } from '../services/restaurantService';
+import { getGooglePhotoUrlsByPlaceId } from '../services/restaurantService';
 import { Card, Box, Typography, Chip, Button, Rating } from '@mui/material';
 import { Link } from 'react-router-dom';
 const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked }) => {
@@ -8,7 +8,7 @@ const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked 
 
   useEffect(() => {
     if (restaurant.id) {
-      getPlacePhotos(restaurant.id, 200)
+      getGooglePhotoUrlsByPlaceId(restaurant.id, 200)
         .then((urls) => setPhotoUrls(urls))
         .catch(() => setPhotoUrls(['https://via.placeholder.com/400']));
     }
@@ -59,8 +59,8 @@ const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked 
             src={photoUrls[currentImageIndex]}
             alt={`Restaurant ${currentImageIndex + 1}`}
             style={{
-              width: '100%',
-              height: '100%',
+              width: '200px',
+              height: '200px',
               objectFit: 'cover',
             }}
           />

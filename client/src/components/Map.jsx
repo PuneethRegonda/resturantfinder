@@ -1,125 +1,92 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
-import { Box, Typography, Rating } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
   height: '100%',
 };
 
-const libraries = ['places'];
-
-const MapContainer = ({ places, userLocation }) => {
-  const [selectedPlace, setSelectedPlace] = useState(null);
+const MapContainer = ({ zipCode }) => {
+  const [userLocation, setUserLocation] = useState({ lat: 37.3304795, lng: -121.905282 });
+  const [places, setPlaces] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const mapRef = useRef(null);
-  const infoWindowTimeout = useRef(null);
 
-  const handleLoad = useCallback((map) => {
-    mapRef.current = map;
-  }, []);
+  const fetchRestaurants = (lat, lng) => {
+    setLoading(true);
+    const map = mapRef.current;
 
-  const handleMarkerMouseOver = (place) => {
-    if (infoWindowTimeout.current) {
-      clearTimeout(infoWindowTimeout.current);
+    if (map) {
+      const service = new window.google.maps.places.PlacesService(map);
+      const request = {
+        location: new window.google.maps.LatLng(lat, lng),
+        radius: 3000,
+        type: 'restaurant',
+      };
+
+      service.nearbySearch(request, (results, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+          setPlaces(results);
+        } else {
+          setError('Failed to fetch places.');
+          console.error('PlacesService error:', status);
+        }
+        setLoading(false);
+      });
     }
-    setSelectedPlace(place);
   };
 
-  const handleMarkerMouseOut = () => {
-    infoWindowTimeout.current = setTimeout(() => {
-      setSelectedPlace(null);
-    }, 10000);
+  const fetchLocationForZip = async (zip) => {
+    if (!zip) return;
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=AIzaSyD3fqwSWp1IuXJesIHBUf1GEhWRVT_LJP4`
+      );
+      const data = await response.json();
+      if (response.ok && data.status === 'OK' && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        setUserLocation({ lat: location.lat, lng: location.lng });
+        fetchRestaurants(location.lat, location.lng);
+      } else {
+        setError('Invalid ZIP code. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error fetching location for ZIP code:', error);
+      setError('Failed to fetch location. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getLocation = (location) => {
-    return {
-      lat: typeof location.lat === 'function' ? location.lat() : location.lat,
-      lng: typeof location.lng === 'function' ? location.lng() : location.lng,
-    };
-  };
+  useEffect(() => {
+    fetchLocationForZip(zipCode);
+  }, [zipCode]); // Trigger fetch whenever the zipCode changes
 
   return (
-    <div
-      style={{
-        position: 'sticky',
-        height: '100%',
-      }}
-      className="map-container"
-    >
-      <LoadScript googleMapsApiKey="AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU" libraries={libraries}>
-        <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={userLocation}
-          zoom={12}
-          onLoad={handleLoad}
-          options={{ disableDefaultUI: true, zoomControl: true }}
-        >
-          {places.map((place) => {
-            const position = getLocation(place.geometry.location);
-            if (position.lat && position.lng) {
-              return (
-                <Marker
-                  key={place.place_id || place.id }
-                  position={position}
-                  onMouseOver={() => handleMarkerMouseOver(place)}
-                  onMouseOut={handleMarkerMouseOut}
-                />
-              );
-            }
-            return null;
-          })}
-
-          {selectedPlace && (
-            <InfoWindow
-              position={getLocation(selectedPlace.geometry.location)}
-              onCloseClick={() => setSelectedPlace(null)}
-            >
-              <Box sx={{ padding: '10px', maxWidth: '250px' }}>
-                <img
-                  src={
-                    selectedPlace.photos && selectedPlace.photos.length > 0
-                      ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&photoreference=${selectedPlace.photos[0].photo_reference}&key=AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU`
-                      : 'https://via.placeholder.com/100'
-                  }
-                  alt={selectedPlace.name}
-                  width="100%"
-                  height="auto"
-                  style={{ borderRadius: 8 }}
-                />
-                <Typography variant="h6" sx={{ fontWeight: 'bold', marginTop: 1 }}>
-                  <Link
-                    to={`/restaurant/${selectedPlace.name.replace(/\s+/g, '-')}`}
-                    style={{ textDecoration: 'none', color: 'inherit' }}
-                  >
-                    {selectedPlace.name}
-                  </Link>
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 0.5 }}>
-                  <Rating
-                    name="read-only"
-                    value={selectedPlace.rating}
-                    readOnly
-                    precision={0.1}
-                    size="small"
-                  />
-                  <Typography
-                    variant="body2"
-                    component="span"
-                    sx={{ marginLeft: 1, fontSize: '0.875rem', color: '#555' }}
-                  >
-                    {selectedPlace.rating} ({selectedPlace.user_ratings_total} reviews)
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="textSecondary" sx={{ marginTop: 1 }}>
-                  {selectedPlace.vicinity}
-                </Typography>
-              </Box>
-            </InfoWindow>
-          )}
-        </GoogleMap>
-      </LoadScript>
-    </div>
+    <LoadScript googleMapsApiKey="AIzaSyD3fqwSWp1IuXJesIHBUf1GEhWRVT_LJP4" libraries={['places']}>
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={userLocation}
+        zoom={12}
+        onLoad={(map) => (mapRef.current = map)} // Reference the map object
+        options={{ disableDefaultUI: true, zoomControl: true }}
+      >
+        {loading && <div>Loading...</div>}
+        {error && <div>{error}</div>}
+        {places.map((place) => (
+          <Marker
+            key={place.place_id}
+            position={{
+              lat: place.geometry.location.lat(),
+              lng: place.geometry.location.lng(),
+            }}
+            title={place.name}
+          />
+        ))}
+      </GoogleMap>
+    </LoadScript>
   );
 };
 

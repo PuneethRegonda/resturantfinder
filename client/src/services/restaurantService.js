@@ -18,15 +18,79 @@ export const searchRestaurants = async ({ page = 0, size = 10, ...filters }) => 
       return acc;
     }, {}),
   }).toString();
-
-
- 
-
   const response = await fetchWithRequestId(`/api/restaurants/search?${queryParams}`);
   if (!response.ok) {
     throw new Error('Failed to fetch restaurants');
   }
   return await response.json();
+};
+
+export const getGooglePhotoUrlsByPlaceId = async (placeId) => {
+  if (!placeId) {
+    throw new Error('Invalid place ID provided');
+  }
+
+  try {
+    // Call the backend API to fetch photo URLs
+    const response = await fetchWithRequestId(`/api/restaurants/google-photos?placeid=${placeId}`);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch photo URLs from Google via backend');
+    }
+
+    // Parse the response JSON
+    const data = await response.json();
+
+    if (data.status !== 'success' || !Array.isArray(data.data)) {
+      throw new Error('Unexpected response structure or missing photo URLs');
+    }
+
+    // Return the array of photo URLs
+    return data.data;
+  } catch (error) {
+    console.error('Error in getGooglePhotoUrlsByPlaceId:', error);
+    throw error; // Rethrow the error for the caller to handle
+  }
+};
+
+
+
+export const searchGoogleRestaurants = async (location) => {
+  if (!location || !location.lat || !location.lng) {
+    throw new Error('Invalid location provided');
+  }
+
+  const queryParams = `${location.lat},${location.lng}`;
+
+  try {
+    const response = await fetchWithRequestId(`/api/restaurants/google?location=${queryParams}`);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch restaurants from Google via backend');
+    }
+
+    const data = await response.json();
+
+    if (data.status="success") {
+      const googlePlacesResponse = JSON.parse(data.data.body); // Extract Google Places API response
+      if (googlePlacesResponse.status === 'OK') {
+        return googlePlacesResponse.results.map((restaurant) => ({
+          id: restaurant.place_id,
+          name: restaurant.name,
+          address: restaurant.vicinity,
+          rating: restaurant.rating,
+          source: 'Google',
+        }));
+      } else {
+        throw new Error(`Google Places API returned an error: ${googlePlacesResponse.status}`);
+      }
+    } else {
+      throw new Error(`Backend API returned an error: ${data.message}`);
+    }
+  } catch (error) {
+    console.error('Error in searchGoogleRestaurants:', error);
+    throw error; // Rethrow the error for the caller to handle
+  }
 };
 
 
@@ -64,7 +128,7 @@ export const getNearbyRestaurants = async (lat, lng) => {
 export const checkPincodeValidity = async (pincode) => {
   try {
     // Replace with your actual Google Maps API key
-    const apiKey = 'AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU';
+    const apiKey = 'AIzaSyD3fqwSWp1IuXJesIHBUf1GEhWRVT_LJP4';
 
     // Make the API call using fetch
     const response = await fetch(
@@ -87,6 +151,23 @@ export const checkPincodeValidity = async (pincode) => {
   }
 };
 
+
+export const getLocation = async (pincode) => {
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${pincode}&key=AIzaSyD3fqwSWp1IuXJesIHBUf1GEhWRVT_LJP4`
+    );
+    const data = await response.json();
+    if (response.status === 200 && data.status === 'OK' && data.results.length > 0) {
+      return data.results[0].geometry.location;
+    } else {
+      return {};
+    }
+  } catch (error) {
+    console.error('Error checking pincode validity:', error);
+    return {lat: 37.3304795, lng: -121.905282};
+  }
+};
 
 export const getRestaurantDetails = async (id) => {
   try {
@@ -117,17 +198,5 @@ export const getPhotoUrl = (placeID) => {
   }
 };
 
-export const getPlacePhotos = async (placeId, maxwidth = 200) => {
-  try {
-    const response = await fetch(`${BASE_URL}/place/photos?placeId=${encodeURIComponent(placeId)}&maxwidth=${maxwidth}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch photos: ${response.status} ${response.statusText}`);
-    }
-    const data = await response.json(); 
-    return data; 
-  } catch (error) {
-    console.error('Error fetching photos:', error.message);
-    throw error;
-  }
-};
+
 

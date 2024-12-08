@@ -5,7 +5,8 @@ import Footer from '../../components/Footer';
 import PaginatedList from '../../components/PaginatedList';
 import RestaurantCard from '../../components/RestaurantCard';
 import InvalidSearch from '../../components/InvalidSearch';
-import { searchRestaurants } from '../../services/restaurantService';
+import { searchRestaurants,searchGoogleRestaurants,getLocation } from '../../services/restaurantService';
+import MapContainer from '../../components/Map';
 
 const Home = () => {
   const [isSearchValid, setIsSearchValid] = useState(true);
@@ -18,20 +19,71 @@ const Home = () => {
       setSearchPayload(payload); // Update search filters
     }
   };
-
-  // Fetch data for the paginated list
-  const fetchRestaurants = async (page, pageSize) => {
+  const fetchGoogleRestaurants = async () => {
+    const location = await getLocation(searchPayload.name) ||  { lat: 37.3304795, lng: -121.905282 }; // Example location
+  
     try {
-      // Merge searchPayload with pagination parameters
-      const response = await searchRestaurants({ ...searchPayload, page: page - 1, size: pageSize });
-      return {
-        data: response.data.content, // List of restaurants
-        totalPages: response.data.totalPages, // Total pages from API
-      };
+      const restaurants = await searchGoogleRestaurants(location);
+      console.log('Google Restaurants:', restaurants);
+      return restaurants;
     } catch (error) {
-      console.error('Error fetching restaurants:', error);
-      throw error;
+      console.error('Error fetching Google restaurants:', error.message);
+      return [];
     }
+  };
+  
+ 
+  const fetchBackendRestaurants = async (payload, page, pageSize) => {
+    try {
+      const response = await searchRestaurants({
+        ...payload,
+        page: page - 1,
+        size: pageSize,
+      });
+      return response.data.content.map((restaurant) => ({
+        id: restaurant.id,
+        name: restaurant.name,
+        address: restaurant.address,
+        rating: restaurant.rating,
+        source: 'Backend',
+      }));
+    } catch (error) {
+      console.error('Error fetching restaurants from backend:', error);
+      return [];
+    }
+  };
+
+  const fetchRestaurants = async (page, pageSize) => {
+    let backendRestaurants = [];
+    let googleResults = [];
+  
+    try {
+      // Fetch restaurants from backend
+      backendRestaurants = await fetchBackendRestaurants(searchPayload, page, pageSize);
+    } catch (error) {
+      console.error('Error fetching backend restaurants:', error);
+    }
+  
+    try {
+      // Fetch restaurants from Google via backend API
+      googleResults = await fetchGoogleRestaurants(searchPayload);
+    } catch (error) {
+      console.error('Error fetching Google restaurants:', error);
+    }
+  
+    // Combine results and deduplicate
+    // const combinedResults = deduplicateResults([...backendRestaurants, ...googleResults]);
+    const combinedResults = backendRestaurants.length
+    ? deduplicateResults([...backendRestaurants, ...googleResults])
+    : googleResults;
+
+    // Paginate the combined results
+    // const paginatedResults = paginateResults(combinedResults, page, pageSize);
+  
+    return {
+      data: combinedResults,
+      totalPages: Math.ceil(combinedResults.length / pageSize),
+    };
   };
 
   return (
@@ -78,9 +130,7 @@ const Home = () => {
             borderRadius: '8px',
           }}
         >
-          <Typography variant="h6" sx={{ padding: 2, color: '#757575' }}>
-            Map Placeholder
-          </Typography>
+          <MapContainer zipCode={searchPayload.name} />
         </Box>
       </Box>
 
