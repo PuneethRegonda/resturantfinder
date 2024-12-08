@@ -5,7 +5,7 @@ import java.util.List;
 public class SearchCriteriaDTO {
     private String name;
     private List<String> cuisines;
-    private PriceRange priceRange;
+    private Integer priceRange;
     private Double minRating;
     private Double latitude;
     private Double longitude;
@@ -32,11 +32,11 @@ public class SearchCriteriaDTO {
         this.cuisines = cuisines;
     }
 
-    public PriceRange getPriceRange() {
+    public Integer getPriceRange() {
         return priceRange;
     }
 
-    public void setPriceRange(PriceRange priceRange) {
+    public void setPriceRange(Integer priceRange) {
         this.priceRange = priceRange;
     }
 

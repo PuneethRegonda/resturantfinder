@@ -1,59 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import RestaurantCard from '../../components/RestaurantCard';
-import MapContainer from '../../components/Map';
+import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import { getNearbyRestaurants, searchRestaurants } from '../../services/restaurantService';
 import AppHeader from '../../components/Header';
 import Footer from '../../components/Footer';
+import PaginatedList from '../../components/PaginatedList';
+import RestaurantCard from '../../components/RestaurantCard';
 import InvalidSearch from '../../components/InvalidSearch';
+import { searchRestaurants } from '../../services/restaurantService';
+
 const Home = () => {
-  const [places, setPlaces] = useState([]);
-  const [userLocation, setUserLocation] = useState({ lat: 0, lng: 0 });
   const [isSearchValid, setIsSearchValid] = useState(true);
+  const [searchPayload, setSearchPayload] = useState({}); // Store search filters
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          setUserLocation(location);
-          getNearbyRestaurants(location.lat, location.lng).then((results) => {
-            setPlaces(results);
-          });
-        },
-        (error) => {
-          console.error('Error getting user location', error);
-        }
-      );
+  // Handle search from the header
+  const handleSearch = (triggeredBy, payload, isValid) => {
+    setIsSearchValid(isValid); // Update search validity state
+    if (isValid) {
+      setSearchPayload(payload); // Update search filters
     }
-  }, []);
+  };
 
-  const handleSearch = (triggeredBy,query, isValid) => {
-    const { lat, lng } = userLocation;
-    setIsSearchValid(isValid);
-    if (!lat || !lng) {
-      console.warn('User location is not available. Please enable location services.');
-      return;
-    }
-    if (!isValid) {
-      return ;
-    }
-    if (query && isValid ) {
-      searchRestaurants(query, lat, lng).then((results) => {
-        setPlaces(results);
-      }).catch((error) => {
-        console.error("Error during restaurant search:", error);
-      });
+  // Fetch data for the paginated list
+  const fetchRestaurants = async (page, pageSize) => {
+    try {
+      // Merge searchPayload with pagination parameters
+      const response = await searchRestaurants({ ...searchPayload, page: page - 1, size: pageSize });
+      return {
+        data: response.data.content, // List of restaurants
+        totalPages: response.data.totalPages, // Total pages from API
+      };
+    } catch (error) {
+      console.error('Error fetching restaurants:', error);
+      throw error;
     }
   };
 
   return (
     <>
       {/* Header Component */}
-      <AppHeader onSearch={handleSearch} sx={{padding:'0px'}}/>
+      <AppHeader onSearch={handleSearch} />
+
       {/* Main Content */}
       <Box
         sx={{
@@ -67,19 +52,18 @@ const Home = () => {
         <Box sx={{ flex: 1 }}>
           {isSearchValid ? (
             <>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 'bold',padding:'13px' }}>
-                  Restaurants in the current map area
-                </Typography>
-              </Box>
-              <Box sx={{ maxHeight: '100%', overflowY: 'auto', paddingRight: 2 }}>
-                {places.map((restaurant) => (
-                  <RestaurantCard key={restaurant.place_id} restaurant={restaurant} />
-                ))}
-              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', padding: '13px' }}>
+                Restaurants in the current map area
+              </Typography>
+              <PaginatedList
+                fetchData={fetchRestaurants}
+                renderItem={(restaurant) => <RestaurantCard restaurant={restaurant} />}
+                pageSize={10} // Adjust page size as needed
+              />
             </>
-          ) : (<InvalidSearch />)
-          }
+          ) : (
+            <InvalidSearch />
+          )}
         </Box>
 
         {/* Map Container */}
@@ -94,7 +78,9 @@ const Home = () => {
             borderRadius: '8px',
           }}
         >
-          <MapContainer places={places} userLocation={userLocation} />
+          <Typography variant="h6" sx={{ padding: 2, color: '#757575' }}>
+            Map Placeholder
+          </Typography>
         </Box>
       </Box>
 

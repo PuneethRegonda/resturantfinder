@@ -13,7 +13,6 @@ public class ErrorDetails {
         this.details = details;
     }
 
-    // Getters
     public String getCode() { return code; }
     public String getMessage() { return message; }
     public List<String> getDetails() { return details; }

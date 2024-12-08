@@ -1,6 +1,5 @@
 package com.opensource.resturantfinder.service;
 
-import com.opensource.resturantfinder.model.PriceRange;
 import com.opensource.resturantfinder.model.RestaurantDTO;
 import com.opensource.resturantfinder.model.SearchCriteria;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,22 +60,11 @@ public class MapsApiService {
             dto.setLatitude(result.getGeometry().getLocation().getLat());
             dto.setLongitude(result.getGeometry().getLocation().getLng());
             dto.setRating(result.getRating());
-            dto.setPriceLevel(convertPriceLevel(result.getPriceLevel()));
+            dto.setPriceLevel(result.getPriceLevel());
             // Set other fields as needed
             restaurants.add(dto);
         }
         return restaurants;
-    }
-
-    private PriceRange convertPriceLevel(Integer apiPriceLevel) {
-        if (apiPriceLevel == null) return null;
-        switch (apiPriceLevel) {
-            case 1: return PriceRange.LOW;
-            case 2: return PriceRange.MEDIUM;
-            case 3: return PriceRange.HIGH;
-            case 4: return PriceRange.VERY_HIGH;
-            default: return null;
-        }
     }
 
     private static class MapsApiResponse {

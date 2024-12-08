@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -15,38 +15,70 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Menu,
+  MenuItem as DropdownItem,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BakeryDiningIcon from '@mui/icons-material/BakeryDining';
 import SearchBar from './SearchBar';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 
 const AppHeader = ({ onSearch }) => {
-  // Filter states
-  const [cuisineType, setCuisineType] = useState('');
-  const [foodType, setFoodType] = useState('');
-  const [priceLevel, setPriceLevel] = useState('');
-  const [rating, setRating] = useState('');
+  // Central filters state
+  const [filters, setFilters] = useState({
+    cuisineType: '',
+    foodType: '',
+    priceLevel: '',
+    rating: '',
+  });
 
-  // Snackbar state to show validation errors
+  // Snackbar state for showing errors
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  // Dialog state for Login and Signup
+  // Dialog states for Login and Signup
   const [openLoginDialog, setOpenLoginDialog] = useState(false);
   const [openSignupDialog, setOpenSignupDialog] = useState(false);
 
-  // Handle search with filters
-  const handleSearch = (triggeredBy, query, isValid) => {
-    if (isValid) {
-      onSearch(triggeredBy, query, isValid);
-    } else {
-      setOpenSnackbar(true); // Show an error if the search term is invalid
-    }
-  };
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
+  const [anchorEl, setAnchorEl] = useState(null); // Anchor for user menu
 
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
+  // Check localStorage for token to determine if user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleSearch = (triggeredBy, query, isValid) => {
+    if (!isValid) {
+      console.warn("Invalid search input");
+      setOpenSnackbar(true); // Show error notification
+      return;
+    }
+  
+    // Prepare the search payload
+    const searchPayload = {
+      ...filters, // Include selected filters
+      name: query.trim() || '', // Set search bar query
+      page: 0, // Reset to first page on new search
+      size: 20, // Default page size
+      sortBy: 'rating', // Default sorting
+    };
+  
+    console.log("Triggering search with payload:", searchPayload); // Debugging purposes
+    onSearch(triggeredBy, searchPayload, true); // Pass the payload to parent component
+  };
+  
+
+
+  
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken'); // Clear token on logout
+    localStorage.removeItem('userRoles'); // Clear token on logout
+    setIsLoggedIn(false);
+    setAnchorEl(null); // Close user menu
   };
 
   return (
@@ -89,11 +121,13 @@ const AppHeader = ({ onSearch }) => {
             <FormControl variant="standard" sx={{ minWidth: 120 }}>
               <InputLabel>Cuisine</InputLabel>
               <Select
-                value={cuisineType}
-                onChange={(e) => {
-                  setCuisineType(e.target.value);
-                  handleSearch('Cuisine', e.target.value, true);
-                }}
+                value={filters.cuisineType}
+                onChange={(e) =>
+                  setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    cuisineType: e.target.value,
+                  }))
+                }
                 label="Cuisine"
               >
                 <MenuItem value="Indian">Indian</MenuItem>
@@ -109,11 +143,13 @@ const AppHeader = ({ onSearch }) => {
             <FormControl variant="standard" sx={{ minWidth: 120 }}>
               <InputLabel>Food Type</InputLabel>
               <Select
-                value={foodType}
-                onChange={(e) => {
-                  setFoodType(e.target.value);
-                  handleSearch('FoodType', e.target.value, true);
-                }}
+                value={filters.foodType}
+                onChange={(e) =>
+                  setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    foodType: e.target.value,
+                  }))
+                }
                 label="Food Type"
               >
                 <MenuItem value="Vegetarian">Vegetarian</MenuItem>
@@ -129,11 +165,13 @@ const AppHeader = ({ onSearch }) => {
             <FormControl variant="standard" sx={{ minWidth: 120 }}>
               <InputLabel>Price</InputLabel>
               <Select
-                value={priceLevel}
-                onChange={(e) => {
-                  setPriceLevel(e.target.value);
-                  handleSearch('Price', e.target.value, true);
-                }}
+                value={filters.priceLevel}
+                onChange={(e) =>
+                  setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    priceLevel: e.target.value,
+                  }))
+                }
                 label="Price"
               >
                 <MenuItem value="low">Low</MenuItem>
@@ -146,11 +184,13 @@ const AppHeader = ({ onSearch }) => {
             <FormControl variant="standard" sx={{ minWidth: 120 }}>
               <InputLabel>Rating</InputLabel>
               <Select
-                value={rating}
-                onChange={(e) => {
-                  setRating(e.target.value);
-                  handleSearch('Rating', e.target.value, true);
-                }}
+                value={filters.rating}
+                onChange={(e) =>
+                  setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    rating: e.target.value,
+                  }))
+                }
                 label="Rating"
               >
                 <MenuItem value={1}>1 Star</MenuItem>
@@ -172,64 +212,88 @@ const AppHeader = ({ onSearch }) => {
               marginX: 4,
             }}
           >
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar onSearch={(query, isValid) => handleSearch('SearchBar', query, isValid)} />
           </Box>
 
           {/* Auth Section */}
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Button
-              variant="outlined"
-              color="inherit"
-              sx={{
-                textTransform: 'none',
-                fontSize: 16,
-                marginRight: 2,
-                borderColor: '#d8d8d8',
-                '&:hover': { borderColor: '#000', backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-              }}
-              onClick={() => setOpenLoginDialog(true)}
-            >
-              Log In
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              sx={{
-                textTransform: 'none',
-                fontSize: 16,
-                backgroundColor: '#d32323',
-                '&:hover': { backgroundColor: '#b81e1e' },
-              }}
-              onClick={() => setOpenSignupDialog(true)}
-            >
-              Sign Up
-            </Button>
+            {isLoggedIn ? (
+              <>
+                <IconButton
+                  color="inherit"
+                  onClick={(e) => setAnchorEl(e.currentTarget)}
+                >
+                  <AccountCircleIcon sx={{ fontSize: 32 }} />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={() => setAnchorEl(null)}
+                >
+                  <DropdownItem onClick={() => setAnchorEl(null)}>Profile</DropdownItem>
+                  <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
+                </Menu>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  sx={{
+                    textTransform: 'none',
+                    fontSize: 16,
+                    marginRight: 2,
+                    borderColor: '#d8d8d8',
+                    '&:hover': { borderColor: '#000', backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+                  }}
+                  onClick={() => setOpenLoginDialog(true)}
+                >
+                  Log In
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  sx={{
+                    textTransform: 'none',
+                    fontSize: 16,
+                    backgroundColor: '#d32323',
+                    '&:hover': { backgroundColor: '#b81e1e' },
+                  }}
+                  onClick={() => setOpenSignupDialog(true)}
+                >
+                  Sign Up
+                </Button>
+              </>
+            )}
           </Box>
-        </Toolbar>
-      </AppBar>
 
-      {/* Login Dialog */}
+          {/* Login Dialog */}
       <Dialog open={openLoginDialog} onClose={() => setOpenLoginDialog(false)}>
-        <DialogTitle>
-          Sign in to Bite Check
-          <IconButton
-            aria-label="close"
-            onClick={() => setOpenLoginDialog(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <LoginForm onClose={() => setOpenLoginDialog(false)} />
-        </DialogContent>
-      </Dialog>
-
+  <DialogTitle>
+    Sign in to Bite Check
+    <IconButton
+      aria-label="close"
+      onClick={() => setOpenLoginDialog(false)}
+      sx={{
+        position: 'absolute',
+        right: 8,
+        top: 8,
+        color: (theme) => theme.palette.grey[500],
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  <DialogContent>
+    <LoginForm
+    onClose={() => setOpenLoginDialog(false)}
+    onLoginSuccess={() => {
+      setIsLoggedIn(true); // Update AppHeader state
+      setOpenLoginDialog(false); // Close login dialog
+    }}
+  />
+  </DialogContent>
+</Dialog>
       {/* Signup Dialog */}
       <Dialog open={openSignupDialog} onClose={() => setOpenSignupDialog(false)}>
         <DialogTitle>
@@ -248,18 +312,26 @@ const AppHeader = ({ onSearch }) => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <RegisterForm onClose={() => setOpenSignupDialog(false)} />
+        <RegisterForm
+          onClose={() => setOpenSignupDialog(false)}
+          onSignupSuccess={() => {
+            setIsLoggedIn(true); // Update AppHeader state
+            setOpenSignupDialog(false); // Close signup dialog
+          }}
+        />
         </DialogContent>
       </Dialog>
+        </Toolbar>
+      </AppBar>
 
-      {/* Snackbar to Show Error Message */}
+      {/* Snackbar */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
+        onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+        <Alert onClose={() => setOpenSnackbar(false)} severity="error" sx={{ width: '100%' }}>
           Invalid search term. Please enter a valid query without special characters, excessive numbers, or too many words.
         </Alert>
       </Snackbar>
