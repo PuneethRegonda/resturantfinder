@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "vite",                 
+    "build": "vite build",         
+    "lint": "eslint .",            
+    "preview": "vite preview",      
+    "start": "vite preview",        
+    "clean": "rm -rf ../backend/src/main/webapp/*", 
+    "deploy": "rm -rf ../backend/src/main/webapp/* && vite build"
   },
   "dependencies": {
     "@date-io/date-fns": "^2.16.0",
