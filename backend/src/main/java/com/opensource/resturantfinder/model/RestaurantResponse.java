@@ -6,13 +6,24 @@ public class RestaurantResponse {
     private String description;
     private String phoneNumber;
     private String website;
+    private String iconUrl;
 
-    public RestaurantResponse(Long id, String name, String description, String phoneNumber, String website) {
+
+    public RestaurantResponse(Long id, String name, String description, String phoneNumber, String website,String iconUrl) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.phoneNumber = phoneNumber;
         this.website = website;
+        this.iconUrl = iconUrl;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
     public Long getId() {

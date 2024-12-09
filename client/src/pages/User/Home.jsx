@@ -49,6 +49,7 @@ const Home = () => {
         address: restaurant.address,
         rating: restaurant.rating,
         source: 'Backend',
+        iconUrl: restaurant.iconUrl
       }));
     } catch (error) {
       console.error('Error fetching restaurants from backend:', error);
@@ -63,6 +64,7 @@ const Home = () => {
     try {
       // Fetch restaurants from backend
       backendRestaurants = await fetchBackendRestaurants(searchPayload, page, pageSize);
+      console.log('Backend Restaurants:', backendRestaurants);
     } catch (error) {
       console.error('Error fetching backend restaurants:', error);
     }
@@ -70,25 +72,40 @@ const Home = () => {
     try {
       // Fetch restaurants from Google via backend API
       googleResults = await fetchGoogleRestaurants(searchPayload);
+      console.log('Google Restaurants:', googleResults);
     } catch (error) {
       console.error('Error fetching Google restaurants:', error);
     }
   
     // Combine results and deduplicate
-    // const combinedResults = deduplicateResults([...backendRestaurants, ...googleResults]);
-    const combinedResults = backendRestaurants.length
-    ? deduplicateResults([...backendRestaurants, ...googleResults])
-    : googleResults;
-
+    const combinedResults = deduplicateResults([...backendRestaurants, ...googleResults]);
+  
     // Paginate the combined results
-    // const paginatedResults = paginateResults(combinedResults, page, pageSize);
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const paginatedResults = combinedResults.slice(start, end);
   
     return {
-      data: combinedResults,
+      data: paginatedResults,
       totalPages: Math.ceil(combinedResults.length / pageSize),
     };
   };
-
+  
+  // Utility function to deduplicate results based on a unique property like `id`
+  const deduplicateResults = (results) => {
+    const uniqueResults = [];
+    const seen = new Set();
+  
+    results.forEach((item) => {
+      if (!seen.has(item.id)) { // Assumes `id` is the unique identifier for restaurants
+        seen.add(item.id);
+        uniqueResults.push(item);
+      }
+    });
+  
+    return uniqueResults;
+  };
+  
   return (
     <>
       {/* Header Component */}

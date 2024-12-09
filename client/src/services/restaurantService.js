@@ -1,7 +1,9 @@
+
+
+import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
 // Function to search restaurants by query using your Spring Boot backend
 const BASE_URL = '';
 
-import { fetchWithRequestId } from '../utils/api'; // Adjust the import path based on your project structure
 
 export const searchRestaurants = async ({ page = 0, size = 10, ...filters }) => {
   const priceLevelMap = { LOW: 1, MEDIUM: 2, HIGH: 3 };
@@ -105,7 +107,11 @@ export const getNearbyRestaurants = async (lat, lng) => {
     // Constructing the URL to call the backend with latitude and longitude
     const url = await fetchWithRequestId(`/api/restaurants/google?location=${lat},${lng}`);
 
-    const response = await fetch(url, {
+    // Construct the query parameters manually
+    const queryParams = `location=${location}`;
+
+    // Hit the unified API
+    const response = await fetch(`${BASE_URL}/getRestaurants?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -114,7 +120,7 @@ export const getNearbyRestaurants = async (lat, lng) => {
 
     if (response.ok) {
       const data = await response.json();
-      return data.results || [];
+      return data.results || []; // Assuming the API returns results in `data.results`
     } else {
       console.error(`Error from backend API (${response.status}): ${response.statusText}`);
       return [];
@@ -124,6 +130,8 @@ export const getNearbyRestaurants = async (lat, lng) => {
     return [];
   }
 };
+
+
 
 export const checkPincodeValidity = async (pincode) => {
   try {
@@ -190,7 +198,7 @@ export const getRestaurantDetails = async (id) => {
 
 export const getPhotoUrl = (placeID) => {
   if (photoDetails) {
-  const apiKey = 'AIzaSyDewJC5STCF9FQRfe1EAVnU8kJvfsRhLPU'; 
+  const apiKey = 'AIzaSyCX5XGEKQe3G4M0R84r7sZkeTwXlCMtTuU'; 
   const googlePhotoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&placeid=${placID}&key=${apiKey}`;
   return googlePhotoUrl;
   }else {
