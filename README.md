@@ -33,7 +33,7 @@ Frontend ↔ Backend ↔ Database
 
 Include a diagram (e.g., an image of your architecture).
 
-![System Architecture](architecture_diagram.jpeg)
+![System Architecture](./documentation/architecture_diagram.jpeg)
 
 ---
 
@@ -42,7 +42,7 @@ Include a diagram (e.g., an image of your architecture).
 ### Deployment Diagram
 Deployed in AWS with a Load Balancer with single DB sharing nodes. 
 
-![Deployment Diagram](deployment.drawio.jpg)
+![Deployment Diagram](./documentation/deployment.drawio.jpg)
 
 ---
 
@@ -139,11 +139,10 @@ The complete API documentation is available [here](https://project-5587.postman.
 ---
 
 ## Team Progress
-Project journal [here](ProjectJournal-202.pdf)
-XP values [here](XPvalues.pdf)
-Week Wise Task Distribution [here](CMPE202_WeekWiseTaskDistribution-GoogleDocs.pdf)
-Burn Down Task [here](202burn.pdf)
-Wire Frames [here](wireframes.png)
+Project journal [here](./documentation/ProjectJournal-202.pdf)
+XP values [here](./documentation/XPvalues.pdf)
+Burn Down Task [here](./documentation/202burn.pdf)
+Wire Frames [here](./documentation/wireframes.png)
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
