@@ -144,7 +144,6 @@
 
 	</dependencies>
 	<build>
-
 	<finalName>resturantfinder</finalName>
 		<plugins>
 			<plugin>

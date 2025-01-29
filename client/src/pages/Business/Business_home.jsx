@@ -15,12 +15,8 @@ import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useNavigate } from "react-router-dom";
 import { fetchWithRequestId } from "../../utils/api";
-import axios from "axios";
 
 const BusinessHome = () => {
-  const [file, setFile] = useState(null);
-  const [uploadResponse, setUploadResponse] = useState(null);
-
   const navigate = useNavigate();
   const [restaurantDetails, setRestaurantDetails] = useState({
     name: "",
@@ -90,45 +86,27 @@ const BusinessHome = () => {
     }));
   };
 
-  const uploadFile = async (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) {
-      alert("Please select a file to upload.");
-      return;
-    }
-  
+  const handlePhotoUpload = (e) => {
+    const files = e.target.files;
     const formData = new FormData();
-    formData.append("file", selectedFile);
-  
-    try {
-      const response = await axios.post("/api/files/upload", formData, {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-          "X-Request-ID": "123e4567-e89b-12d3-a456-426614174000",
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
-      if (response.data.status === "success" && response.data.data) {
-        const uploadedIconUrl = response.data.data;
-  
-        // Set the uploaded URL as the iconUrl in the payload
+
+    Array.from(files).forEach((file) => {
+      formData.append("file", file);
+    });
+
+    fetch("/api/photos/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
         setRestaurantDetails((prevState) => ({
           ...prevState,
-          iconUrl: uploadedIconUrl, // Dynamically set iconUrl
+          photos: [...prevState.photos, data.photoUrl],
         }));
-  
-        alert("File uploaded successfully!");
-      } else {
-        throw new Error("File upload failed. Invalid response.");
-      }
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      alert("Failed to upload the file.");
-    }
+      })
+      .catch((error) => console.error("Error uploading photos:", error));
   };
-  
-
 
   const handleSubmit = () => {
     const {
@@ -140,11 +118,10 @@ const BusinessHome = () => {
       cuisine,
       price,
       foodType,
-      iconUrl, // Use the dynamically set iconUrl here
     } = restaurantDetails;
-  
+
     const vicinity = `${streetAddress}, ${aptSuiteOther ? aptSuiteOther + ", " : ""}${city}, ${state} ${zipcode}, ${country}`;
-  
+
     const dayMap = {
       Monday: 1,
       Tuesday: 2,
@@ -154,7 +131,7 @@ const BusinessHome = () => {
       Saturday: 6,
       Sunday: 7,
     };
-  
+
     const operatingHours = Object.entries(hours).reduce((acc, [day, times]) => {
       if (times.open && times.close) {
         acc.push({
@@ -165,21 +142,17 @@ const BusinessHome = () => {
       }
       return acc;
     }, []);
-  
+
     const priceLevelMap = { Low: 1, Medium: 2, High: 3 };
     const priceLevel = priceLevelMap[price] || 1;
-  
+
     const categories = [...cuisine, ...foodType];
-  
+
     const payload = {
       name,
       businessStatus: "OPERATIONAL",
-      latitude: 37.3310013, // Replace with actual latitude
-      longitude: -121.8878173, // Replace with actual longitude
-      iconUrl: iconUrl || "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/restaurant-71.png",
+      iconUrl: "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/restaurant-71.png",
       priceLevel,
-      rating: 4.2, // Example rating
-      userRatingsTotal: 1304, // Example total ratings
       vicinity,
       description,
       phoneNumber: contact,
@@ -189,10 +162,11 @@ const BusinessHome = () => {
       isVegan: foodType.includes("Vegan"),
       categories,
       operatingHours,
+      zipcode: restaurantDetails.address.zipcode,
     };
-  
+
     console.log("Payload sent to backend:", payload);
-  
+
     fetchWithRequestId("/api/restaurants", {
       method: "POST",
       headers: {
@@ -210,7 +184,6 @@ const BusinessHome = () => {
         alert("Failed to add restaurant.");
       });
   };
-  
 
   const handleViewRestaurantClick = () => {
     navigate("/views");
@@ -382,13 +355,13 @@ const BusinessHome = () => {
             />
             <Box>
               <Typography variant="body1" sx={{ marginBottom: "8px" }}>
-                Upload Photo
+                Upload Photos
               </Typography>
               <input
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={uploadFile}
+                onChange={handlePhotoUpload}
               />
               <Box
                 sx={{

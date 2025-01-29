@@ -5,8 +5,6 @@ import com.opensource.resturantfinder.exception.ResourceNotFoundException;
 import com.opensource.resturantfinder.model.RestaurantResponse;
 import com.opensource.resturantfinder.model.RestaurantUpdateRequest;
 import com.opensource.resturantfinder.repository.RestaurantRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +14,6 @@ import java.util.stream.Collectors;
 @Service
 public class BusinessOwnerRestaurantService {
 
-    private static final Logger log = LoggerFactory.getLogger(BusinessOwnerRestaurantService.class);
     @Autowired
     private RestaurantRepository restaurantRepository;
 
@@ -40,8 +37,7 @@ public class BusinessOwnerRestaurantService {
                 updatedRestaurant.getName(),
                 updatedRestaurant.getDetails().getDescription(),
                 updatedRestaurant.getDetails().getPhoneNumber(),
-                updatedRestaurant.getDetails().getWebsite(),
-                updatedRestaurant.getIconUrl()
+                updatedRestaurant.getDetails().getWebsite()
         );
     }
 
@@ -51,19 +47,14 @@ public class BusinessOwnerRestaurantService {
     public List<RestaurantResponse> getOwnedRestaurants(String emailId) {
         List<Restaurant> restaurants = restaurantRepository.findByEmailId(emailId);
 
-        for (Restaurant restaurant : restaurants) {
-            log.info("restaurants iconUrl {}" ,restaurant.getIconUrl());
-        }
         return restaurants.stream()
                 .map(r -> new RestaurantResponse(
                         r.getId(),
                         r.getName(),
                         r.getDetails().getDescription(),
                         r.getDetails().getPhoneNumber(),
-                        r.getDetails().getWebsite(),
-                        r.getIconUrl()
+                        r.getDetails().getWebsite()
                 ))
                 .collect(Collectors.toList());
     }
-
 }

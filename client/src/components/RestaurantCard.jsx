@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { getGooglePhotoUrlsByPlaceId } from '../services/restaurantService';
+import { getPlacePhotos } from '../services/restaurantService';
 import { Card, Box, Typography, Chip, Button, Rating } from '@mui/material';
 import { Link } from 'react-router-dom';
-import RoomOutlinedIcon from '@mui/icons-material/RoomOutlined';
 const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked }) => {
   const [photoUrls, setPhotoUrls] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Current image index
 
   useEffect(() => {
     if (restaurant.id) {
-      getGooglePhotoUrlsByPlaceId(restaurant.id, 200)
+      getPlacePhotos(restaurant.id, 200)
         .then((urls) => setPhotoUrls(urls))
-        .catch(() => setPhotoUrls([restaurant.iconUrl]));
+        .catch(() => setPhotoUrls(['https://via.placeholder.com/400']));
     }
   }, [restaurant.id]);
 
@@ -60,8 +59,8 @@ const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked 
             src={photoUrls[currentImageIndex]}
             alt={`Restaurant ${currentImageIndex + 1}`}
             style={{
-              width: '250px',
-              height: '200px',
+              width: '100%',
+              height: '100%',
               objectFit: 'cover',
             }}
           />
@@ -144,51 +143,15 @@ const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked 
             value={restaurant.rating}
             readOnly
             size="small"
-            precision={0.5}
-            bold
           />
-           <Typography
-    variant="body2"
-    sx={{ marginLeft: 1, fontSize: '0.875rem' }}
-  >
-    <Box component="span" sx={{ fontWeight: 'bold' }}>
-      {restaurant.rating}
-    </Box>{' '}
-    <Box component="span" sx={{ color: '#757575' }}>
-      ({restaurant.user_ratings_total} reviews)
-    </Box>
-  </Typography>
+          <Typography
+            variant="body2"
+            sx={{ marginLeft: 1, color: '#757575', fontSize: '0.875rem' }}
+          >
+            {restaurant.rating} ({restaurant.user_ratings_total} reviews)
+          </Typography>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
-      {/* Location Icon and Vicinity */}
-      <RoomOutlinedIcon sx={{ fontSize: '1rem' }} />
-      <Typography variant="body2" sx={{ marginLeft: 0.5, color: '#333', fontSize: '0.875rem' }}>
-        {restaurant.vicinity}
-      </Typography>
-      
-      {/* Dot Separator */}
-      <Typography variant="body2" sx={{ margin: '0 8px', color: '#333' }}>•</Typography>
 
-      {/* Price Level */}
-      <Typography variant="body2" sx={{ color: '#333', fontSize: '0.875rem' }}>
-        {'$'.repeat(restaurant.price_level)}
-      </Typography>
-
-      {/* Dot Separator */}
-      <Typography variant="body2" sx={{ margin: '0 8px', color: '#333' }}>•</Typography>
-
-      {/* Opening Hours */}
-      <Typography
-        variant="body2"
-        sx={{
-          color: restaurant.opening_hours?.open_now ? 'green' : 'red',
-          fontWeight: 'bold',
-          fontSize: '0.875rem',
-        }}
-      >
-        {restaurant.opening_hours?.open_now ? 'Open' : 'Closed'}
-      </Typography>
-    </Box>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, marginBottom: 1 }}>
           {restaurant.types &&
             restaurant.types.slice(0, 2).map((type, index) => (
@@ -202,6 +165,13 @@ const RestaurantCard = ({ restaurant, showCheckbox, onCheckboxChange, isChecked 
             ))}
           <Chip label="$$" variant="outlined" size="small" sx={{ fontSize: '0.75rem', color: '#757575' }} />
         </Box>
+
+        <Typography
+          variant="body2"
+          sx={{ color: 'green', fontWeight: 'bold', marginBottom: 1 }}
+        >
+          Opens in 33 min
+        </Typography>
         <Typography
           variant="body2"
           sx={{
